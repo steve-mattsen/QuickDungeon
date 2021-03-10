@@ -1,0 +1,198 @@
+<Defaults>
+  <Color name="textLight" color="#ffffff" />
+  <Color name="textMedium" color="#bbbbbb" />
+  <Color name="textDark" color="#222222" />
+  <Color name="background" color="rgba(0,0,0,0)" />
+
+  <Panel
+    width="1400"
+    height="1400"
+    color="background"/>
+  <TableLayout
+    cellBackgroundColor="rgba(255,255,255,0)"
+    padding="25"
+    cellPadding="25"/>
+  <Cell />
+  <Text
+    color="textMedium"
+    fontSize="64"
+    outline="#000000"
+    outlineSize="0 0"
+    shadow="#000000"
+    shadowDistance="0"
+    alignment="MiddleLeft" />
+  <Toggle
+    fontSize="64"
+    textColor="textMedium"
+    toggleHeight="40"
+    toggleWidth="40"
+    horizontalOverflow="Overflow"
+    verticalOverflow="Overflow" />
+  <Button
+    colors="textLight|textMedium|green|textDark"
+    fontSize="72"
+    fontStyle="bold" />
+
+  <Panel class="panelFront"
+    position="0 0 10"
+    rotation="0 180 0"
+    />
+  <Panel class="panelBack"
+    position="0 0 -10"
+    rotation="0 0 0"
+    />
+  <Text class="title"
+    fontSize="96"
+    fontWeight="bold"
+    alignment="MiddleCenter"
+    color="textLight"/>
+  <Text class="version"
+    offsetXY="450 -9"
+    color="textDark"
+    alignment="MiddleCenter"
+    active="false" />
+  <Button class="closeButton"
+    width="100"
+    height="100"
+    colors="#cc0000|#880000|#ff0000|textDark"
+    textColor="white"
+    position="625 625 0"
+    interactable="true"
+    onClick="die"/>
+  <Button class="@panelBack:closebutton"
+    position="0 0 0"
+    />
+  <Button class="buttonCreateWalls"
+    onclick="makeWallButtonClick" />
+  <Button class="buttonDeleteWalls"
+    interactable="false"/>
+  <Toggle class="toggleDebug"
+    onValueChanged="setDebugMode"
+    />
+  <Toggle class="toggleDeleteAllWalls"
+    />
+  <Text class="colorList:@Text"
+    alignment="MiddleCenter"
+    color="#000000"
+    />
+  <Toggle class="toggleColorMode"
+    interactable="false"
+    />
+  <Toggle class="toggleSnapWalls"
+    interactable="false"
+    />
+  <Toggle class="toggleSnapGrid"
+    interactable="false"
+    />
+  <Toggle class="toggleCollision"
+    interactable="false"
+    />
+  <Toggle class="toggleDeleteAllWalls"
+    interactable="false"
+    />
+  <Toggle class="toggleCreateAllLines"
+    interactable="false"
+    />
+</Defaults>
+
+<!--Body-->
+
+<Panel class="panelFront">
+  <Button class="closeButton">X</Button>
+  <TableLayout>
+    <Row preferredHeight="175">
+      <Text class="version">0.1.3</Text>
+      <Cell columnSpan="2">
+        <Text class="title">QuickDungeon</Text>
+      </Cell>
+    </Row>
+    <Row>
+      <Cell columnSpan="2">
+          <VerticalLayout padding="25 25 0 25">
+            <Text>Use the line tool to draw a dungeon map on the table</Text>
+            <Text>Place this tile over the drawing and press "Create Walls"</Text>
+            <Text>To delete walls, place this tile on them and press "Delete Walls"</Text>
+            <Text>For options, flip this tile</Text>
+          </VerticalLayout>
+      </Cell>
+    </Row>
+    <Row preferredHeight="175">
+      <Cell>
+        <Button class="buttonCreateWalls">Create Walls</Button>
+      </Cell>
+      <Cell>
+        <Button class="buttonDeleteWalls">Delete Walls</Button>
+      </Cell>
+    </Row>
+  </TableLayout>
+</Panel>
+
+<Panel class="panelBack">
+  <Button class="closeButton">X</Button>
+  <TableLayout>
+    <Row preferredHeight="175">
+      <Text class="version">0.1.3</Text>
+      <Cell columnSpan="2">
+        <Text class="title">QuickDungeon</Text>
+      </Cell>
+    </Row>
+    <Row preferredHeight="100">
+      <Cell>
+        <Toggle class="toggleColorMode">Color Mode</Toggle>
+      </Cell>
+      <Cell>
+        <Toggle class="toggleCollision">Collision / fog of war</Toggle>
+      </Cell>
+    </Row>
+    <Row preferredHeight="200">
+      <Cell columnSpan="2">
+          <Text>In color mode, different draw colors will create different types of walls:</Text>
+      </Cell>
+    </Row>
+    <Row class="colorList">
+      <Cell columnSpan="2">
+        <HorizontalLayout>
+        <VerticalLayout>
+          <Panel color="white"><Text>Castle</Text></Panel>
+          <Panel color="grey"><Text>Cave</Text></Panel>
+          <Panel color="purple"><Text>Door</Text></Panel>
+        </VerticalLayout>
+        <VerticalLayout>
+          <Panel color="brown"><Text>Dirt</Text></Panel>
+          <Panel color="orange"><Text>Wood</Text></Panel>
+          <Panel color="black"><Text color="textMedium">No wall</Text></Panel>
+        </VerticalLayout>
+        <VerticalLayout>
+          <Panel color="yellow"><Text>House</Text></Panel>
+          <Panel color="green"><Text>Bush</Text></Panel>
+          <Panel />
+        </VerticalLayout>
+      </HorizontalLayout>
+      </Cell>
+    </Row>
+    <Row preferredHeight="100">
+        <Cell>
+          <Toggle class="toggleSnapWalls">Walls snap to walls</Toggle>
+        </Cell>
+        <Cell>
+          <Toggle class="toggleSnapGrid">Walls snap to grid</Toggle>
+        </Cell>
+    </Row>
+    <Row preferredHeight="100">
+        <Cell>
+          <Toggle class="toggleCreateAllLines">Create from all lines</Toggle>
+        </Cell>
+        <Cell>
+          <Toggle class="toggleDeleteAllWalls">Delete all walls</Toggle>
+        </Cell>
+    </Row>
+    <Row preferredHeight="200">
+      <Cell>
+        <Button class="buttonCreateWalls">Create walls</Button>
+      </Cell>
+      <Cell>
+        <Button class="buttonDeleteWalls">Delete Walls</Button>
+      </Cell>
+    </Row>
+  </TableLayout>
+</Panel>

@@ -1,0 +1,159 @@
+-- QuickDungeon by Steve Mattsen
+-- Version 0.1.3
+button = {
+  click_function = 'makeWallButtonClick',
+  function_owner = self,
+  label = 'Make Walls',
+  width = 1200,
+  height = 400,
+  font_size = 200,
+}
+
+debugMode = false
+
+function onLoad(save_state)
+  self.setScale({1, 1, 1})
+  print(dump(UI.getCustomAssets()))
+  -- button = self.createButton(button)
+end
+
+function makeWallButtonClick()
+  makeWalls(collectLines())
+end
+
+function collectLines()
+  bounds = self.getBounds()
+  debug('Bounds: ' .. dump(bounds))
+  local halfWidth = (bounds.size.x / 2)
+  local halfHeight = (bounds.size.z / 2)
+  debug('Halfwidth: ' .. halfWidth)
+  debug('Halfheight: ' .. halfHeight)
+  local p1 = {
+    x = bounds.center.x + halfWidth,
+    z = bounds.center.z + halfHeight
+  }
+  local p2 = {
+    x = bounds.center.x - halfWidth,
+    z = bounds.center.z - halfHeight
+  }
+  local bounds = {p1, p2}
+
+  lines = {}
+  allLines = Global.getVectorLines()
+  if allLines == nil then
+    out("Detected no lines in the world.")
+    return nil
+  end
+  for i,v in pairs(allLines) do
+    debug('Checking collision with point ' .. i)
+    debug(dump(v))
+    inBounds = isInBounds(v.points[1], bounds) and isInBounds(v.points[2], bounds)
+
+    if inBounds then
+      table.insert(lines, v)
+      if debugMode then
+        pingLine(v)
+      end
+    end
+  end
+  if #lines == 0 then
+    out("Detected no lines under the plate.")
+    return nil
+  end
+  return lines
+end
+
+function makeWalls(lines)
+  if lines == nil then
+     return nil
+   end
+  local count = 0;
+  for i, v in pairs(lines) do
+    count = count + 1
+    box = spawnObject({
+      type = "BlockSquare",
+      position = v.points[1]:lerp(v.points[2], 0.5),
+      scale = {0.125, 2.5, v.points[1]:distance(v.points[2]) },
+      sound = false
+    })
+    box.locked = true
+    box.getComponent("BoxCollider").set("enabled", false)
+    box.addTag("quicktile")
+    box.translate({0,box.getScale().y / 2,0})
+    box.setColorTint(Color.fromString("Grey"))
+    angle = math.atan2(v.points[1].x - v.points[2].x, v.points[1].z - v.points[2].z)
+    angle = math.deg(angle)
+    box.setRotation({0, angle, 0})
+    -- box.setRotation({0, rotate[1], 0})
+  end
+  out("Made " .. count .. " walls.")
+end
+
+function dump(o)
+   if type(o) == 'table' then
+      local s = '{ '
+      for k,v in pairs(o) do
+         if type(k) ~= 'number' then k = '"'..k..'"' end
+         s = s .. '['..k..'] = ' .. dump(v) .. ','
+      end
+      return s .. '} '
+   else
+      return tostring(o)
+   end
+end
+
+function isEmpty(t)
+  local hasRecord = false
+  for _,_ in pairs(t) do
+      hasRecord = true
+      break
+  end
+  return hasRecord
+end
+
+function out(msg)
+  printToAll("QuickDungeon: " .. msg)
+end
+
+function debug(msg)
+  if debugMode then
+    log(msg, "QuickDungeon debug: ")
+  end
+end
+
+function pingLine(line)
+  Player.getPlayers()[1].pingTable(line.points[1]:lerp(line.points[2], 0.5))
+end
+
+function isInBounds(point, bounds)
+  -- Bounds is a two-point table. Top right and bottom left in that order
+  if point.x > bounds[1].x then
+    return false
+  elseif point.x < bounds[2].x then
+    return false
+  elseif point.z > bounds[1].z then
+    return false
+  elseif point.z < bounds[2].z then
+    return false
+  end
+  return true
+end
+
+
+function setDebugMode(v, e)
+  if e == "True" then
+    debugMode = true;
+    debug("Enabled debug mode.")
+  else
+    debugMode = false;
+    debug("Disabled debug mode.")
+  end
+end
+
+function onDestroy()
+  debug("Deleted self.")
+end
+
+function die()
+  self.destruct()
+end
