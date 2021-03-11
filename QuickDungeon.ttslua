@@ -136,11 +136,11 @@ function createWall(p1, p2)
     sound = false,
      callback_function = function (obj) callbackSinglePlane(obj, p1, p2) end
   })
+  box.locked = true
   box.setCustomObject({
     mesh = "http://cloud-3.steamusercontent.com/ugc/1746806450112931199/56EEE121BF2C6F71E25A8204D27FBB1BF0BB9DAD/",
     material = 3,
   })
-  box.locked = true
   box.addTag("QuickDungeon Wall")
   box.translate({0,box.getScale().y / 2,0})
   box.setColorTint(Color.fromString("Grey"))
