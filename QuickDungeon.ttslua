@@ -21,7 +21,7 @@ function collectLines()
     out("Detected no lines in the world.")
     return nil
   end
-  if vars['toggleCreateAllLines'] == true then
+  if vars['createFromAllLines'] == true then
     return allLines;
   end
 

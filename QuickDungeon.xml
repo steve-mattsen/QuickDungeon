@@ -178,7 +178,7 @@
     </Row>
     <Row preferredHeight="100">
         <Cell>
-          <Toggle id="toggleCreateAllLines">Create from all lines</Toggle>
+          <Toggle id="createFromAllLines">Create from all lines</Toggle>
         </Cell>
         <Cell>
           <Toggle id="deleteAllWalls">Delete all walls</Toggle>
