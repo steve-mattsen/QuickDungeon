@@ -13,6 +13,15 @@ function makeWallButtonClick()
 end
 
 function collectLines()
+  allLines = Global.getVectorLines()
+  if allLines == nil then
+    out("Detected no lines in the world.")
+    return nil
+  end
+  if vars['toggleCreateAllLines'] == true then
+    return allLines;
+  end
+
   bounds = self.getBounds()
   debug('Bounds: ' .. dump(bounds))
   local halfWidth = (bounds.size.x / 2)
@@ -30,11 +39,6 @@ function collectLines()
   local bounds = {p1, p2}
 
   lines = {}
-  allLines = Global.getVectorLines()
-  if allLines == nil then
-    out("Detected no lines in the world.")
-    return nil
-  end
   for i,v in pairs(allLines) do
     debug('Checking collision with point ' .. i)
     debug(dump(v))
