@@ -66,7 +66,7 @@
   <Button class="buttonCreateWalls"
     onclick="makeWallButtonClick" />
   <Button class="buttonDeleteWalls"
-    interactable="false"/>
+    onClick="deleteWallsButtonClick"/>
   <Toggle class="toggleDebug"
     onValueChanged="setDebugMode"
     />
@@ -181,7 +181,7 @@
           <Toggle id="toggleCreateAllLines">Create from all lines</Toggle>
         </Cell>
         <Cell>
-          <Toggle class="toggleDeleteAllWalls">Delete all walls</Toggle>
+          <Toggle id="deleteAllWalls">Delete all walls</Toggle>
         </Cell>
     </Row>
     <Row preferredHeight="200">

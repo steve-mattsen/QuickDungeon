@@ -11,6 +11,10 @@ function makeWallButtonClick()
   makeWalls(collectLines())
 end
 
+function deleteWallsButtonClick()
+  deleteWalls(collectWalls())
+end
+
 function collectLines()
   allLines = Global.getVectorLines()
   if allLines == nil then
@@ -74,7 +78,7 @@ function makeWalls(lines)
     })
     box.locked = true
     box.getComponent("BoxCollider").set("enabled", false)
-    box.addTag("quicktile")
+    box.addTag("QuickDungeon Wall")
     box.translate({0,box.getScale().y / 2,0})
     box.setColorTint(Color.fromString("Grey"))
     angle = math.atan2(v.points[1].x - v.points[2].x, v.points[1].z - v.points[2].z)
@@ -83,6 +87,20 @@ function makeWalls(lines)
     -- box.setRotation({0, rotate[1], 0})
   end
   out("Made " .. count .. " walls.")
+end
+
+function deleteWalls(walls)
+  for i, v in pairs(walls) do
+    destroyObject(v)
+  end
+end
+
+function collectWalls()
+  walls = getObjectsWithTag("QuickDungeon Wall")
+  if vars['deleteAllWalls'] == true then
+    return walls
+  end
+  return {}
 end
 
 function dump(o)
