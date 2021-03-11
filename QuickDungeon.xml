@@ -137,7 +137,7 @@
         <Toggle class="toggleColorMode">Texture Mode</Toggle>
       </Cell>
       <Cell>
-        <Toggle id="collision">Collision / fog of war</Toggle>
+        <Toggle id="collision" interactable="false">Collision / fog of war</Toggle>
       </Cell>
     </Row>
     <Row preferredHeight="150">
