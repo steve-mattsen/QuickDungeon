@@ -29,10 +29,12 @@ function collectLines()
   debug('Halfheight: ' .. halfHeight)
   local p1 = {
     x = bounds.center.x + halfWidth,
+    y = 0,
     z = bounds.center.z + halfHeight
   }
   local p2 = {
     x = bounds.center.x - halfWidth,
+    y = 0,
     z = bounds.center.z - halfHeight
   }
   local bounds = {p1, p2}
