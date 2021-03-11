@@ -10,8 +10,11 @@ function debug(msg, level)
   if level == nil then
     level = 1
   end
+  if msg == nil then
+    msg = ''
+  end
   if debugLevel >= level then
-    log('QD-' .. level .. ': ' .. msg, nil, 'quickdungeon' .. level)
+    log('QD-' .. level .. ': ' .. dump(msg), '', 'quickdungeon' .. level)
   end
 end
 
@@ -21,6 +24,19 @@ function setDebug(level)
   end
   debugLevel = level
   debug('Set debug level to ' .. level, 0)
+end
+
+function dump(o)
+   if type(o) == 'table' then
+      local s = '{ '
+      for k,v in pairs(o) do
+         if type(k) ~= 'number' then k = '"'..k..'"' end
+         s = s .. '['..k..'] = ' .. dump(v) .. ','
+      end
+      return s .. '} '
+   else
+      return tostring(o)
+   end
 end
 
 setDebug(0)
@@ -160,19 +176,6 @@ function collectWalls()
     return walls
   end
   return {}
-end
-
-function dump(o)
-   if type(o) == 'table' then
-      local s = '{ '
-      for k,v in pairs(o) do
-         if type(k) ~= 'number' then k = '"'..k..'"' end
-         s = s .. '['..k..'] = ' .. dump(v) .. ','
-      end
-      return s .. '} '
-   else
-      return tostring(o)
-   end
 end
 
 function out(msg)
