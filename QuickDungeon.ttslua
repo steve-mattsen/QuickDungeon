@@ -1,10 +1,33 @@
 -- QuickDungeon by Steve Mattsen
 -- Version 0.1.5
-debugLevel = 1
+
+function debug(msg, level)
+  if level == nil then
+    level = 3
+  end
+  if debugLevel >= level then
+    log('QD-' .. level .. ': ' .. msg, nil, 'quickdungeon' .. level)
+  end
+end
+
+function setDebug(level)
+  if level == nil then
+    level = 0
+  end
+  debugLevel = level
+  debug('Set debug level to ' .. level, 0)
+end
+
+setDebug(3)
 -- level 0: no debug
 -- Level 1: function calls
 -- level 2: Loops and major events
 -- level 3: Local variables (very slow)
+
+logStyle('quickdungeon0', 'White')
+logStyle('quickdungeon1', 'Blue')
+logStyle('quickdungeon2', 'Green')
+logStyle('quickdungeon3', 'Yellow')
 
 vars = {
   createFromAllLines = false,
@@ -19,7 +42,9 @@ function onLoad(save_state)
 end
 
 function makeWallButtonClick()
-  makeWalls(collectLines())
+  debug('Starting the make wall process', 0)
+  lines = collectLines()
+  makeWalls(lines)
 end
 
 function deleteWallsButtonClick()
@@ -56,7 +81,7 @@ function collectLines()
 
   lines = {}
   for i,v in pairs(allLines) do
-    debug('Checking collision with point ' .. i, 2)
+    debug('Checking plate boundaries with point ' .. i, 2)
     inBounds = isInBounds(v.points[1], bounds) and isInBounds(v.points[2], bounds)
 
     if inBounds then
@@ -159,15 +184,6 @@ end
 
 function out(msg)
   printToAll("QuickDungeon: " .. msg)
-end
-
-function debug(msg, level)
-  if level == nil then
-    level = 3
-  end
-  if debugLevel >= level then
-    log(msg, "QuickDungeon debug: ")
-  end
 end
 
 function pingLine(line)
