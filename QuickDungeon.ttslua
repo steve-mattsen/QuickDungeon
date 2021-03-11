@@ -98,15 +98,6 @@ function dump(o)
    end
 end
 
-function isEmpty(t)
-  local hasRecord = false
-  for _,_ in pairs(t) do
-      hasRecord = true
-      break
-  end
-  return hasRecord
-end
-
 function out(msg)
   printToAll("QuickDungeon: " .. msg)
 end
