@@ -8,7 +8,7 @@ logStyle('quickdungeon3', 'Yellow')
 
 function debug(msg, level)
   if level == nil then
-    level = 3
+    level = 1
   end
   if debugLevel >= level then
     log('QD-' .. level .. ': ' .. msg, nil, 'quickdungeon' .. level)
@@ -43,8 +43,8 @@ function onLoad(save_state)
 end
 
 function makeWallButtonClick()
-  debug('Starting the make wall process', 0)
   lines = collectLines()
+  debug('Starting the make wall process', 1)
   makeWalls(lines)
 end
 
