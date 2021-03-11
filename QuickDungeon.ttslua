@@ -43,8 +43,10 @@ function onLoad(save_state)
 end
 
 function makeWallButtonClick()
-  lines = collectLines()
   debug('Starting the make wall process', 1)
+  lines = Global.getVectorLines()
+  makeBoundingBoxes(lines)
+  lines = collectLines(lines)
   makeWalls(lines)
 end
 
@@ -52,12 +54,7 @@ function deleteWallsButtonClick()
   deleteWalls(collectWalls())
 end
 
-function collectLines()
-  allLines = Global.getVectorLines()
-  if allLines == nil then
-    out("Detected no lines in the world.")
-    return nil
-  end
+function collectLines( allLines )
   if vars['createFromAllLines'] == true then
     return allLines;
   end
@@ -220,5 +217,41 @@ end
 function callbackSinglePlane(obj, p1, p2)
   if vars['collision'] ~= true then
     obj.getComponent("BoxCollider").set("enabled", false)
+  end
+end
+
+function makeBoundingBoxes(lines)
+  debug('Making bounding boxes for drawn objects', 1)
+  if lines == nil then
+    return nil
+  end
+  for i, v in pairs(lines) do
+    local maxX, maxZ = -10000, -10000
+    local minX, minZ = 10000, 10000
+    debug('Finding bounds for line ' .. i .. ": " .. dump(v), 3)
+    for pi, pv in pairs(v.points) do
+      debug('Point number ' .. pi .. ': ' .. dump(pv), 3)
+      if pv.x > maxX then
+        maxX = pv.x
+      end
+      if pv.x < minX then
+        minX = pv.x
+      end
+      if pv.z > maxZ then
+        maxZ = pv.z
+      end
+      if pv.z < minZ then
+        minZ = pv.z
+      end
+    end
+    debug('Bounds now set to: ' .. minX .. ', ' .. minZ .. ' -> ' .. maxX .. ', ' .. maxZ, 2)
+    if debugLevel >= 3 then
+      Player["White"].pingTable({minX, 0, minZ})
+      Player["White"].pingTable({maxX, 0, maxZ})
+    end
+    v.bounds = {
+      {x=minX, y=0, z=minZ},
+      {x=maxX, y=0, z=maxZ}
+    }
   end
 end
