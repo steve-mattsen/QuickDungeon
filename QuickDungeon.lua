@@ -55,6 +55,7 @@ function deleteWallsButtonClick()
 end
 
 function collectLines( allLines )
+  debug('Filtering out unneessary lines.', 1)
   if vars['createFromAllLines'] == true then
     return allLines;
   end
@@ -94,6 +95,7 @@ function collectLines( allLines )
 end
 
 function makeWalls(lines)
+    debug('Creating the calculated walls.', 1)
   if lines == nil then
      return nil
    end
