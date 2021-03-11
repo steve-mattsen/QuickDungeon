@@ -132,13 +132,10 @@ function makeWalls(lines)
     if v.loop == true or v.square == true then
       createWall(prevPoint, v.points[1])
     elseif pointCount > 2 then
+      debug('Determining if first and last points should be connected.', 2)
       -- Connect the first and last points if they're close enough.
       diffX = math.abs(prevPoint.x - v.points[1].x)
       diffY = math.abs(prevPoint.z - v.points[1].z)
-      debug(prevPoint)
-      debug(v.points[1])
-      debug(diffX)
-      debug(diffY)
       if diffX < 0.2 and diffY < 0.2 then
         createWall(prevPoint, v.points[1])
       end
@@ -147,6 +144,7 @@ function makeWalls(lines)
 end
 
 function createWall(p1, p2)
+  debug('Creating wall.', 1)
   box = spawnObject({
     type = "Custom_Model",
     position = p1:lerp(p2, 0.5),
