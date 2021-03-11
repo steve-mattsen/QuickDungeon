@@ -1,6 +1,11 @@
 -- QuickDungeon by Steve Mattsen
 -- Version 0.1.5
-debugMode = false
+debugLevel = 1
+-- level 0: no debug
+-- Level 1: function calls
+-- level 2: Loops and major events
+-- level 3: Local variables (very slow)
+
 vars = {
   createFromAllLines = false,
   deleteAllWalls = false,
@@ -32,11 +37,11 @@ function collectLines()
   end
 
   bounds = self.getBounds()
-  debug('Bounds: ' .. dump(bounds))
+  debug('Bounds: ' .. dump(bounds), 3)
   local halfWidth = (bounds.size.x / 2)
   local halfHeight = (bounds.size.z / 2)
-  debug('Halfwidth: ' .. halfWidth)
-  debug('Halfheight: ' .. halfHeight)
+  debug('Halfwidth: ' .. halfWidth, 3)
+  debug('Halfheight: ' .. halfHeight, 3)
   local p1 = {
     x = bounds.center.x + halfWidth,
     y = 0,
@@ -51,13 +56,12 @@ function collectLines()
 
   lines = {}
   for i,v in pairs(allLines) do
-    debug('Checking collision with point ' .. i)
-    debug(dump(v))
+    debug('Checking collision with point ' .. i, 2)
     inBounds = isInBounds(v.points[1], bounds) and isInBounds(v.points[2], bounds)
 
     if inBounds then
       table.insert(lines, v)
-      if debugMode then
+      if debugLevel > 0 then
         pingLine(v)
       end
     end
@@ -157,8 +161,11 @@ function out(msg)
   printToAll("QuickDungeon: " .. msg)
 end
 
-function debug(msg)
-  if debugMode then
+function debug(msg, level)
+  if level == nil then
+    level = 3
+  end
+  if debugLevel >= level then
     log(msg, "QuickDungeon debug: ")
   end
 end
@@ -183,7 +190,7 @@ end
 
 function die()
   self.destruct()
-  debug("Deleted self.")
+  debug("Deleted self.", 1)
 end
 
 function setVar(lua, v, id)
