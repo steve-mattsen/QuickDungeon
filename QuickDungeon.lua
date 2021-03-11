@@ -145,17 +145,18 @@ end
 
 function createWall(p1, p2)
   debug('Creating wall.', 1)
+  pos = p1:lerp(p2, 0.5);
   box = spawnObject({
     type = "Custom_Model",
-    position = p1:lerp(p2, 0.5),
-    scale = {0.125, 2.5, p1:distance(p2) },
+    position = {pos.x, 2, pos.z},
+    scale = {0,0,0},
     sound = false,
      callback_function = function (obj) callbackSinglePlane(obj, p1, p2) end
   })
-  box.locked = true
-  box.getComponent("BoxCollider").set("enabled", false)
+  setSuperLock(box, true)
   box.setCustomObject({
     mesh = "http://cloud-3.steamusercontent.com/ugc/1746806450112931199/56EEE121BF2C6F71E25A8204D27FBB1BF0BB9DAD/",
+    collider = "http://cloud-3.steamusercontent.com/ugc/1746806450115851187/E838009DA69AD28BE1F57666B26D9EAF85942FD3/",
     material = 3,
   })
   box.addTag("QuickDungeon Wall")
@@ -214,18 +215,15 @@ function setVar(lua, v, id)
 end
 
 function callbackSinglePlane(box, p1, p2)
-  box.locked = true
-  if vars['collision'] ~= true then
-    box.getComponent("BoxCollider").set("enabled", false)
+  if box == nil then
+    return nil
   end
-  box.setCustomObject({
-    mesh = "http://cloud-3.steamusercontent.com/ugc/1746806450112931199/56EEE121BF2C6F71E25A8204D27FBB1BF0BB9DAD/",
-    material = 3,
-  })
+  setSuperLock(box, true)
   angle = math.atan2(p1.x - p2.x, p1.z - p2.z)
   angle = math.deg(angle)
   box.setRotation({0, angle + 180, 0})
   box.setScale({0.1, 0.2, p1:distance(p2) * 0.075})
+  setSuperLock(box, true)
 end
 
 function makeBoundingBoxes(lines)
@@ -261,5 +259,20 @@ function makeBoundingBoxes(lines)
       {x=minX, y=0, z=minZ},
       {x=maxX, y=0, z=maxZ}
     }
+  end
+end
+
+function setSuperLock(obj, state)
+  if obj == nil then
+    return false
+  end
+  if state ~= true then
+    state = false
+  end
+  obj.locked = state
+  obj.interactable = state
+  local box = obj.getComponent("BoxCollider");
+  if box != nil then
+    box.set("enabled", state)
   end
 end
