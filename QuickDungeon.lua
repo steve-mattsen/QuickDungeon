@@ -139,17 +139,13 @@ function createWall(p1, p2)
      callback_function = function (obj) callbackSinglePlane(obj, p1, p2) end
   })
   box.locked = true
+  box.getComponent("BoxCollider").set("enabled", false)
   box.setCustomObject({
     mesh = "http://cloud-3.steamusercontent.com/ugc/1746806450112931199/56EEE121BF2C6F71E25A8204D27FBB1BF0BB9DAD/",
     material = 3,
   })
   box.addTag("QuickDungeon Wall")
-  box.translate({0,box.getScale().y / 2,0})
   box.setColorTint(Color.fromString("Grey"))
-  angle = math.atan2(p1.x - p2.x, p1.z - p2.z)
-  angle = math.deg(angle)
-  box.setRotation({0, angle + 180, 0})
-  box.setScale({0.1, 0.2, p1:distance(p2) * 0.075})
 end
 
 function deleteWalls(walls)
@@ -216,10 +212,19 @@ function setVar(lua, v, id)
   end
 end
 
-function callbackSinglePlane(obj, p1, p2)
+function callbackSinglePlane(box, p1, p2)
+  box.locked = true
   if vars['collision'] ~= true then
-    obj.getComponent("BoxCollider").set("enabled", false)
+    box.getComponent("BoxCollider").set("enabled", false)
   end
+  box.setCustomObject({
+    mesh = "http://cloud-3.steamusercontent.com/ugc/1746806450112931199/56EEE121BF2C6F71E25A8204D27FBB1BF0BB9DAD/",
+    material = 3,
+  })
+  angle = math.atan2(p1.x - p2.x, p1.z - p2.z)
+  angle = math.deg(angle)
+  box.setRotation({0, angle + 180, 0})
+  box.setScale({0.1, 0.2, p1:distance(p2) * 0.075})
 end
 
 function makeBoundingBoxes(lines)
