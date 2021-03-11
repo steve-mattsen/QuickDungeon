@@ -70,25 +70,28 @@ function makeWalls(lines)
   local count = 0;
   for i, v in pairs(lines) do
     count = count + 1
-    box = spawnObject({
-      type = "BlockSquare",
-      position = v.points[1]:lerp(v.points[2], 0.5),
-      scale = {0.125, 2.5, v.points[1]:distance(v.points[2]) },
-      sound = false
-    })
-    box.locked = true
-    if vars['collision'] ~= true then
-      box.getComponent("BoxCollider").set("enabled", false)
-    end
-    box.addTag("QuickDungeon Wall")
-    box.translate({0,box.getScale().y / 2,0})
-    box.setColorTint(Color.fromString("Grey"))
-    angle = math.atan2(v.points[1].x - v.points[2].x, v.points[1].z - v.points[2].z)
-    angle = math.deg(angle)
-    box.setRotation({0, angle, 0})
-    -- box.setRotation({0, rotate[1], 0})
+    createWall(v.points[1], v.points[2])
   end
   out("Made " .. count .. " walls.")
+end
+
+function createWall(p1, p2)
+  box = spawnObject({
+    type = "BlockSquare",
+    position = p1:lerp(p2, 0.5),
+    scale = {0.125, 2.5, p1:distance(p2) },
+    sound = false
+  })
+  box.locked = true
+  if vars['collision'] ~= true then
+    box.getComponent("BoxCollider").set("enabled", false)
+  end
+  box.addTag("QuickDungeon Wall")
+  box.translate({0,box.getScale().y / 2,0})
+  box.setColorTint(Color.fromString("Grey"))
+  angle = math.atan2(p1.x - p2.x, p1.z - p2.z)
+  angle = math.deg(angle)
+  box.setRotation({0, angle, 0})
 end
 
 function deleteWalls(walls)
