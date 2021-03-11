@@ -105,19 +105,19 @@
     <Row>
       <Cell columnSpan="2">
           <VerticalLayout padding="25 25 0 25">
-            <Text>Use the line tool to draw a dungeon map on the table</Text>
-            <Text>Place this tile over the drawing and press "Create Walls"</Text>
-            <Text>To delete walls, place this tile on them and press "Delete Walls"</Text>
+            <Text>Use the draw tool to draw a dungeon map on the table</Text>
+            <Text>Place this tile over the drawing and press Create</Text>
+            <Text>To delete walls, place this tile on them and press Delete</Text>
             <Text>For options, flip this tile</Text>
           </VerticalLayout>
       </Cell>
     </Row>
     <Row preferredHeight="175">
       <Cell>
-        <Button class="buttonCreateWalls">Create Walls</Button>
+        <Button class="buttonCreateWalls">Create</Button>
       </Cell>
       <Cell>
-        <Button class="buttonDeleteWalls">Delete Walls</Button>
+        <Button class="buttonDeleteWalls">Delete</Button>
       </Cell>
     </Row>
   </TableLayout>
@@ -134,15 +134,15 @@
     </Row>
     <Row preferredHeight="100">
       <Cell>
-        <Toggle class="toggleColorMode">Color Mode</Toggle>
+        <Toggle class="toggleColorMode">Texture Mode</Toggle>
       </Cell>
       <Cell>
         <Toggle id="collision">Collision / fog of war</Toggle>
       </Cell>
     </Row>
-    <Row preferredHeight="200">
+    <Row preferredHeight="150">
       <Cell columnSpan="2">
-          <Text>In color mode, different draw colors will create different types of walls:</Text>
+          <Text>In texture mode, draw color decides wall type</Text>
       </Cell>
     </Row>
     <Row class="colorList">
@@ -156,7 +156,7 @@
         <VerticalLayout>
           <Panel color="brown"><Text>Dirt</Text></Panel>
           <Panel color="orange"><Text>Wood</Text></Panel>
-          <Panel color="black"><Text color="textMedium">No wall</Text></Panel>
+          <Panel color="black"><Text color="textMedium">Erase</Text></Panel>
         </VerticalLayout>
         <VerticalLayout>
           <Panel color="yellow"><Text>House</Text></Panel>
@@ -183,10 +183,10 @@
     </Row>
     <Row preferredHeight="200">
       <Cell>
-        <Button class="buttonCreateWalls">Create walls</Button>
+        <Button class="buttonCreateWalls">Create</Button>
       </Cell>
       <Cell>
-        <Button class="buttonDeleteWalls">Delete Walls</Button>
+        <Button class="buttonDeleteWalls">Delete</Button>
       </Cell>
     </Row>
   </TableLayout>
