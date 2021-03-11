@@ -86,9 +86,6 @@ function collectLines()
 
     if inBounds then
       table.insert(lines, v)
-      if debugLevel > 0 then
-        pingLine(v)
-      end
     end
   end
   if #lines == 0 then
