@@ -95,7 +95,6 @@ function makeWalls(lines)
       debug(v.points[1])
       debug(diffX)
       debug(diffY)
-      --  Player.getPlayers()[1].pingTable(prevPoint:lerp(v.points[1]))
       if diffX < 0.2 and diffY < 0.2 then
         createWall(prevPoint, v.points[1])
       end
