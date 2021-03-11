@@ -151,9 +151,9 @@ end
 
 function setVar(lua, v, id)
   if v == "True" then
-    vars[id] = true;
+    vars[id] = true
   elseif v == "False" then
-    vars[id] = false;
+    vars[id] = false
   else
     vars[id] = value
   end
