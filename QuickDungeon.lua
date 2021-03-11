@@ -23,7 +23,7 @@ function setDebug(level)
   debug('Set debug level to ' .. level, 0)
 end
 
-setDebug(3)
+setDebug(0)
 -- level 0: no debug
 -- Level 1: function calls
 -- level 2: Loops and major events
