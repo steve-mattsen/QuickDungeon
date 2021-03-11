@@ -27,7 +27,8 @@
     toggleHeight="40"
     toggleWidth="40"
     horizontalOverflow="Overflow"
-    verticalOverflow="Overflow" />
+    verticalOverflow="Overflow"
+    onValueChanged="setVar" />
   <Button
     colors="textLight|textMedium|green|textDark"
     fontSize="72"
@@ -88,9 +89,6 @@
     interactable="false"
     />
   <Toggle class="toggleDeleteAllWalls"
-    interactable="false"
-    />
-  <Toggle class="toggleCreateAllLines"
     interactable="false"
     />
 </Defaults>
@@ -180,7 +178,7 @@
     </Row>
     <Row preferredHeight="100">
         <Cell>
-          <Toggle class="toggleCreateAllLines">Create from all lines</Toggle>
+          <Toggle id="toggleCreateAllLines">Create from all lines</Toggle>
         </Cell>
         <Cell>
           <Toggle class="toggleDeleteAllWalls">Delete all walls</Toggle>

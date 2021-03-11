@@ -10,6 +10,7 @@ button = {
 }
 
 debugMode = false
+vars = {}
 
 function onLoad(save_state)
   self.setScale({1, 1, 1})
@@ -139,21 +140,17 @@ function isInBounds(point, bounds)
   return true
 end
 
-
-function setDebugMode(v, e)
-  if e == "True" then
-    debugMode = true;
-    debug("Enabled debug mode.")
-  else
-    debugMode = false;
-    debug("Disabled debug mode.")
-  end
-end
-
-function onDestroy()
+function die()
+  self.destruct()
   debug("Deleted self.")
 end
 
-function die()
-  self.destruct()
+function setVar(lua, v, id)
+  if v == "True" then
+    vars[id] = true;
+  elseif v == "False" then
+    vars[id] = false;
+  else
+    vars[id] = value
+  end
 end
