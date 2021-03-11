@@ -70,8 +70,6 @@
   <Toggle class="toggleDebug"
     onValueChanged="setDebugMode"
     />
-  <Toggle class="toggleDeleteAllWalls"
-    />
   <Text class="colorList:@Text"
     alignment="MiddleCenter"
     color="#000000"
