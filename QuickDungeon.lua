@@ -72,7 +72,7 @@ end
 
 function collectLines( allLines )
   debug('Filtering out unneessary lines.', 1)
-  if vars['createFromAllLines'] == true then
+  if vars['affectGlobal'] == true then
     return allLines;
   end
 
@@ -171,7 +171,7 @@ end
 
 function collectWalls()
   walls = getObjectsWithTag("QuickDungeon Wall")
-  if vars['deleteAllWalls'] == true then
+  if vars['affectGlobal'] == true then
     return walls
   end
   return {}

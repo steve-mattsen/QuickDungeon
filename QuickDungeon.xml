@@ -176,10 +176,9 @@
     </Row>
     <Row preferredHeight="100">
         <Cell>
-          <Toggle id="createFromAllLines">Create from all lines</Toggle>
+          <Toggle id="affectGlobal">Affect all lines/walls</Toggle>
         </Cell>
         <Cell>
-          <Toggle id="deleteAllWalls">Delete all walls</Toggle>
         </Cell>
     </Row>
     <Row preferredHeight="200">
