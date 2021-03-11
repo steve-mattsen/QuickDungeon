@@ -1,6 +1,11 @@
 -- QuickDungeon by Steve Mattsen
 -- Version 0.1.5
 
+logStyle('quickdungeon0', 'White')
+logStyle('quickdungeon1', 'Blue')
+logStyle('quickdungeon2', 'Green')
+logStyle('quickdungeon3', 'Yellow')
+
 function debug(msg, level)
   if level == nil then
     level = 3
@@ -24,10 +29,6 @@ setDebug(3)
 -- level 2: Loops and major events
 -- level 3: Local variables (very slow)
 
-logStyle('quickdungeon0', 'White')
-logStyle('quickdungeon1', 'Blue')
-logStyle('quickdungeon2', 'Green')
-logStyle('quickdungeon3', 'Yellow')
 
 vars = {
   createFromAllLines = false,
