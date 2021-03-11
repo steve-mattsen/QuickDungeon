@@ -1,21 +1,11 @@
 -- QuickDungeon by Steve Mattsen
 -- Version 0.1.3
-button = {
-  click_function = 'makeWallButtonClick',
-  function_owner = self,
-  label = 'Make Walls',
-  width = 1200,
-  height = 400,
-  font_size = 200,
-}
-
 debugMode = false
 vars = {}
 
 function onLoad(save_state)
   self.setScale({1, 1, 1})
   print(dump(UI.getCustomAssets()))
-  -- button = self.createButton(button)
 end
 
 function makeWallButtonClick()
