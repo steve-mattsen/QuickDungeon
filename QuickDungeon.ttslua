@@ -1,7 +1,11 @@
 -- QuickDungeon by Steve Mattsen
 -- Version 0.1.3
 debugMode = false
-vars = {}
+vars = {
+  createFromAllLines = false,
+  deleteAllWalls = false,
+  collision = false,
+}
 
 function onLoad(save_state)
   self.setScale({1, 1, 1})
@@ -67,12 +71,36 @@ function makeWalls(lines)
   if lines == nil then
      return nil
    end
-  local count = 0;
+
   for i, v in pairs(lines) do
-    count = count + 1
-    createWall(v.points[1], v.points[2])
+    local prevPoint = nil
+    for pi, pv in pairs(v.points) do
+      if prevPoint == nil then
+        prevPoint = pv
+      else
+        createWall(prevPoint, pv)
+        prevPoint = pv
+      end
+    end
+
+    pointCount = v.points
+    pointCount = #pointCount
+    if v.loop == true or v.square == true then
+      createWall(prevPoint, v.points[1])
+    elseif pointCount > 2 then
+      -- Connect the first and last points if they're close enough.
+      diffX = math.abs(prevPoint.x - v.points[1].x)
+      diffY = math.abs(prevPoint.z - v.points[1].z)
+      debug(prevPoint)
+      debug(v.points[1])
+      debug(diffX)
+      debug(diffY)
+      --  Player.getPlayers()[1].pingTable(prevPoint:lerp(v.points[1]))
+      if diffX < 0.2 and diffY < 0.2 then
+        createWall(prevPoint, v.points[1])
+      end
+    end
   end
-  out("Made " .. count .. " walls.")
 end
 
 function createWall(p1, p2)
