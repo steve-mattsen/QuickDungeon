@@ -77,7 +77,9 @@ function makeWalls(lines)
       sound = false
     })
     box.locked = true
-    box.getComponent("BoxCollider").set("enabled", false)
+    if vars['collision'] ~= true then
+      box.getComponent("BoxCollider").set("enabled", false)
+    end
     box.addTag("QuickDungeon Wall")
     box.translate({0,box.getScale().y / 2,0})
     box.setColorTint(Color.fromString("Grey"))
