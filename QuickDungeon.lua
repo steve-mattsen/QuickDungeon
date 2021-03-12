@@ -83,31 +83,31 @@ function collectLines( allLines )
   debug('Halfwidth: ' .. halfWidth, 3)
   debug('Halfheight: ' .. halfHeight, 3)
   local p1 = {
-    x = bounds.center.x + halfWidth,
-    y = 0,
-    z = bounds.center.z + halfHeight
-  }
-  local p2 = {
     x = bounds.center.x - halfWidth,
     y = 0,
     z = bounds.center.z - halfHeight
   }
-  local bounds = {p1, p2}
+  local p2 = {
+    x = bounds.center.x + halfWidth,
+    y = 0,
+    z = bounds.center.z + halfHeight
+  }
+  bounds = {p1, p2}
 
-  lines = {}
+  local result = {}
   for i,v in pairs(allLines) do
     debug('Checking plate boundaries with point ' .. i, 2)
-    inBounds = isInBounds(v.points[1], bounds) and isInBounds(v.points[2], bounds)
+    inBounds = boundsOverlap(bounds, v.bounds)
 
     if inBounds then
-      table.insert(lines, v)
+      table.insert(result, v)
     end
   end
-  if #lines == 0 then
+  if #result == 0 then
     out("Detected no lines under the plate.")
     return nil
   end
-  return lines
+  return result
 end
 
 function makeWalls(lines)
@@ -231,6 +231,7 @@ function makeBoundingBoxes(lines)
   if lines == nil then
     return nil
   end
+  local result = {}
   for i, v in pairs(lines) do
     local maxX, maxZ = -10000, -10000
     local minX, minZ = 10000, 10000
@@ -259,7 +260,9 @@ function makeBoundingBoxes(lines)
       {x=minX, y=0, z=minZ},
       {x=maxX, y=0, z=maxZ}
     }
+    table.insert(result, v)
   end
+  return result
 end
 
 function setSuperLock(obj, state)
@@ -275,4 +278,22 @@ function setSuperLock(obj, state)
   if box != nil then
     box.set("enabled", state)
   end
+end
+
+function boundsOverlap(bbox1, bbox2)
+  -- Assumes bbox1 and 2 are two points in {lowerLeft, upperRight} format.
+  if bbox1[1].z > bbox2[2].z then
+    -- bbox1 is above bbox2
+    return false
+  elseif bbox1[2].z < bbox2[1].z then
+    -- bbox1 is below bbox2
+    return false
+  elseif bbox1[1].x > bbox2[2].x then
+    -- bbox1 is to the right of bbox2
+    return false
+  elseif bbox1[2].x < bbox2[1].x then
+    -- bbox1 is to the left of bbox2
+    return false
+  end
+  return true
 end
