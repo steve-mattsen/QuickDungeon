@@ -31,23 +31,7 @@ function collectLines( allLines )
     return allLines;
   end
 
-  bounds = self.getBounds()
-  debug('Bounds: ' .. dump(bounds), 3)
-  local halfWidth = (bounds.size.x / 2)
-  local halfHeight = (bounds.size.z / 2)
-  debug('Halfwidth: ' .. halfWidth, 3)
-  debug('Halfheight: ' .. halfHeight, 3)
-  local p1 = {
-    x = bounds.center.x - halfWidth,
-    y = 0,
-    z = bounds.center.z - halfHeight
-  }
-  local p2 = {
-    x = bounds.center.x + halfWidth,
-    y = 0,
-    z = bounds.center.z + halfHeight
-  }
-  bounds = {p1, p2}
+  local bounds = calcBbox(self)
 
   local result = {}
   for i,v in pairs(allLines) do
