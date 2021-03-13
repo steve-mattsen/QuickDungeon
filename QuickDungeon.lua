@@ -119,18 +119,27 @@ function createWall(p1, p2)
 end
 
 function deleteWalls(walls)
+  debug('Deleting selected walls.', 1)
   for i, v in pairs(walls) do
     destroyObject(v)
   end
 end
 
 function collectWalls()
-  walls = getObjectsWithTag("QuickDungeon Wall")
+  debug("Collecting walls", 1)
+  local walls = getObjectsWithTag("QuickDungeon Wall")
   if vars['affectGlobal'] == true then
     return walls
   end
-  return {}
-end
+  local result = {}
+  local bbox = calcBbox(self)
+  debug("Checking bounding boxes with plate.", 2)
+  for i, v in pairs(walls) do
+    if boundsOverlap(bbox, calcBbox(v)) == true then
+      table.insert(result, v)
+    end
+  end
+  return result
 end
 
 function isInBounds(point, bounds)
@@ -244,4 +253,21 @@ function boundsOverlap(bbox1, bbox2)
     return false
   end
   return true
+end
+
+function calcBbox(obj)
+  local b = obj.getBounds()
+  local halfWidth = (b.size.x / 2)
+  local halfHeight = (b.size.z / 2)
+  return {
+    {
+      x = b.center.x - halfWidth,
+      y = 0,
+      z = b.center.z - halfHeight
+    }, {
+      x = b.center.x + halfWidth,
+      y = 0,
+      z = b.center.z + halfHeight
+    }
+  }
 end
