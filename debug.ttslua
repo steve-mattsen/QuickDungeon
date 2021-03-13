@@ -1,0 +1,51 @@
+logStyle('quickdungeon0', 'White')
+logStyle('quickdungeon1', 'Blue')
+logStyle('quickdungeon2', 'Green')
+logStyle('quickdungeon3', 'Yellow')
+
+function debug(msg, level)
+  if level == nil then
+    level = 1
+  end
+  if msg == nil then
+    msg = ''
+  end
+  if debugLevel >= level then
+    log('QD-' .. level .. ': ' .. dump(msg), '', 'quickdungeon' .. level)
+  end
+end
+
+function setDebug(level)
+  if level == nil then
+    level = 0
+  end
+  debugLevel = level
+  debug('Set debug level to ' .. level, 0)
+end
+
+function dump(o)
+   if type(o) == 'table' then
+      local s = '{ '
+      for k,v in pairs(o) do
+         if type(k) ~= 'number' then k = '"'..k..'"' end
+         s = s .. '['..k..'] = ' .. dump(v) .. ','
+      end
+      return s .. '} '
+   else
+      return tostring(o)
+   end
+end
+
+function out(msg)
+  printToAll("QuickDungeon: " .. msg)
+end
+
+function pingLine(line)
+  Player.getPlayers()[1].pingTable(line.points[1]:lerp(line.points[2], 0.5))
+end
+
+setDebug(2)
+-- level 0: no debug
+-- Level 1: function calls
+-- level 2: Loops and major events
+-- level 3: Local variables (very slow)

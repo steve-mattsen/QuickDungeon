@@ -1,0 +1,92 @@
+<Defaults>
+  <Color name="textLight" color="#ffffff" />
+  <Color name="textMedium" color="#bbbbbb" />
+  <Color name="textDark" color="#222222" />
+  <Color name="background" color="rgba(0,0,0,0)" />
+
+  <Panel
+    width="1400"
+    height="1400"
+    color="background"/>
+  <TableLayout
+    cellBackgroundColor="rgba(255,255,255,0)"
+    padding="25"
+    cellPadding="25"/>
+  <Cell />
+  <Text
+    color="textMedium"
+    fontSize="64"
+    outline="#000000"
+    outlineSize="0 0"
+    shadow="#000000"
+    shadowDistance="0"
+    alignment="MiddleLeft" />
+  <Toggle
+    fontSize="64"
+    textColor="textMedium"
+    toggleHeight="40"
+    toggleWidth="40"
+    horizontalOverflow="Overflow"
+    verticalOverflow="Overflow"
+    onValueChanged="setVar" />
+  <Button
+    colors="textLight|textMedium|green|textDark"
+    fontSize="72"
+    fontStyle="bold" />
+
+  <Panel class="panelFront"
+    position="0 0 10"
+    rotation="0 180 0"
+    />
+  <Panel class="panelBack"
+    position="0 0 -10"
+    rotation="0 0 0"
+    />
+  <Text class="title"
+    fontSize="96"
+    fontWeight="bold"
+    alignment="MiddleCenter"
+    color="textLight"/>
+  <Text class="version"
+    offsetXY="450 -9"
+    color="textDark"
+    alignment="MiddleCenter"
+    active="false" />
+  <Button class="closeButton"
+    width="100"
+    height="100"
+    colors="#cc0000|#880000|#ff0000|textDark"
+    textColor="white"
+    position="625 625 0"
+    interactable="true"
+    onClick="die"/>
+  <Button class="@panelBack:closebutton"
+    position="0 0 0"
+    />
+  <Button class="buttonCreateWalls"
+    onclick="makeWallButtonClick" />
+  <Button class="buttonDeleteWalls"
+    onClick="deleteWallsButtonClick"/>
+  <Toggle class="toggleDebug"
+    onValueChanged="setDebugMode"
+    />
+  <Text class="colorList:@Text"
+    alignment="MiddleCenter"
+    color="#000000"
+    />
+  <Toggle class="toggleColorMode"
+    interactable="false"
+    />
+  <Toggle class="toggleSnapWalls"
+    interactable="false"
+    />
+  <Toggle class="toggleSnapGrid"
+    interactable="false"
+    />
+  <Toggle class="toggleCollision"
+    interactable="false"
+    />
+  <Toggle class="toggleDeleteAllWalls"
+    interactable="false"
+    />
+</Defaults>
