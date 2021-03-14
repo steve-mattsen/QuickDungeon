@@ -1,5 +1,5 @@
 -- QuickDungeon by Steve Mattsen
--- Version 0.1.5
+-- Version 0.1.6
 
 vars = {
   createFromAllLines = false,
@@ -9,7 +9,7 @@ vars = {
 
 function onLoad(save_state)
   self.setScale({1, 1, 1})
-  self.setName("QuickDungeon version 0.1.5")
+  self.setName("QuickDungeon version 0.1.6")
   self.setDescription("by Steve Mattsen")
 end
 

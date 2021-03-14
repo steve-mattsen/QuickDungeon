@@ -6,7 +6,7 @@
   <Button class="closeButton">X</Button>
   <TableLayout>
     <Row preferredHeight="175">
-      <Text class="version">0.1.3</Text>
+      <Text class="version">0.1.6</Text>
       <Cell columnSpan="2">
         <Text class="title">QuickDungeon</Text>
       </Cell>
@@ -36,7 +36,7 @@
   <Button class="closeButton">X</Button>
   <TableLayout>
     <Row preferredHeight="175">
-      <Text class="version">0.1.5</Text>
+      <Text class="version">0.1.6</Text>
       <Cell columnSpan="2">
         <Text class="title">QuickDungeon</Text>
       </Cell>
