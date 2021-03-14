@@ -77,8 +77,8 @@ function makeWalls(lines)
       end
     end
 
-    pointCount = v.points
-    pointCount = #pointCount
+    pointCount = #v.points
+    local endWall = nil
     if v.loop == true then
       endWall = createWall(prevPoint, v.points[1])
     elseif pointCount > 2 then
@@ -100,13 +100,13 @@ end
 
 function createWall(p1, p2)
   debug('Creating wall.', 1)
-  pos = p1:lerp(p2, 0.5);
-  box = spawnObject({
+  local pos = p1:lerp(p2, 0.5);
+  local box = spawnObject({
     type = "Custom_Model",
     position = {pos.x, 2, pos.z},
     scale = {0,0,0},
     sound = false,
-     callback_function = function (obj) callbackSinglePlane(obj, p1, p2) end
+    callback_function = function (obj) callbackSinglePlane(obj, p1, p2) end
   })
   setSuperLock(box, true)
   box.setCustomObject({
