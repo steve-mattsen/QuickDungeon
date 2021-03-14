@@ -115,7 +115,9 @@ function createWall(p1, p2, color)
   box.setCustomObject({
     mesh = "http://cloud-3.steamusercontent.com/ugc/1746806450112931199/56EEE121BF2C6F71E25A8204D27FBB1BF0BB9DAD/",
     collider = "http://cloud-3.steamusercontent.com/ugc/1746806450115851187/E838009DA69AD28BE1F57666B26D9EAF85942FD3/",
-    material = 3,
+    normal = "http://cloud-3.steamusercontent.com/ugc/1007062188578614105/900DF6934D56A075A94618D9A6640DC26650BE66/",
+    diffuse = "http://cloud-3.steamusercontent.com/ugc/1007062188578613916/B584C011D44E42F4F431556E215DE8F727FCFA6B/",
+    material = 1,
   })
   box.addTag("QuickDungeon Wall")
   box.setColorTint(color)
