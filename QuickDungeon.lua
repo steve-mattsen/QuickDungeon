@@ -71,7 +71,7 @@ function makeWalls(lines)
       else
         angle = math.atan2(prevPoint.x - pv.x, prevPoint.z - pv.z)
         angle = math.deg(angle)
-        wall = createWall(prevPoint, pv)
+        wall = createWall(prevPoint, pv, v.color)
         wall.setRotation({0, (angle + angleMod), 0})
         prevPoint = pv
       end
@@ -80,14 +80,14 @@ function makeWalls(lines)
     pointCount = #v.points
     local endWall = nil
     if v.loop == true then
-      endWall = createWall(prevPoint, v.points[1])
+      endWall = createWall(prevPoint, v.points[1], v.color)
     elseif pointCount > 2 then
       debug('Determining if first and last points should be connected.', 2)
       -- Connect the first and last points if they're close enough.
       diffX = math.abs(prevPoint.x - v.points[1].x)
       diffY = math.abs(prevPoint.z - v.points[1].z)
       if diffX < 0.2 and diffY < 0.2 then
-        endWall = createWall(prevPoint, v.points[1])
+        endWall = createWall(prevPoint, v.points[1], v.color)
       end
     end
     if endWall != nil then
@@ -98,8 +98,11 @@ function makeWalls(lines)
   end
 end
 
-function createWall(p1, p2)
-  debug('Creating wall.', 1)
+function createWall(p1, p2, color)
+  if color == nil then
+    color = Color.fromString("White")
+  end
+  debug('Creating wall.', 2)
   local pos = p1:lerp(p2, 0.5);
   local box = spawnObject({
     type = "Custom_Model",
@@ -115,7 +118,7 @@ function createWall(p1, p2)
     material = 3,
   })
   box.addTag("QuickDungeon Wall")
-  box.setColorTint(Color.fromString("Grey"))
+  box.setColorTint(color)
   return box
 end
 
