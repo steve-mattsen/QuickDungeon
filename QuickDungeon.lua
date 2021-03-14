@@ -57,27 +57,43 @@ function makeWalls(lines)
 
   for i, v in pairs(lines) do
     local prevPoint = nil
+    local angleMod = 0
+    if v.loop == true then
+      if (#v.points == 4) then
+        angleMod = 0
+      else
+        angleMod = 180
+      end
+    end
     for pi, pv in pairs(v.points) do
       if prevPoint == nil then
         prevPoint = pv
       else
-        createWall(prevPoint, pv)
+        angle = math.atan2(prevPoint.x - pv.x, prevPoint.z - pv.z)
+        angle = math.deg(angle)
+        wall = createWall(prevPoint, pv)
+        wall.setRotation({0, (angle + angleMod), 0})
         prevPoint = pv
       end
     end
 
     pointCount = v.points
     pointCount = #pointCount
-    if v.loop == true or v.square == true then
-      createWall(prevPoint, v.points[1])
+    if v.loop == true then
+      endWall = createWall(prevPoint, v.points[1])
     elseif pointCount > 2 then
       debug('Determining if first and last points should be connected.', 2)
       -- Connect the first and last points if they're close enough.
       diffX = math.abs(prevPoint.x - v.points[1].x)
       diffY = math.abs(prevPoint.z - v.points[1].z)
       if diffX < 0.2 and diffY < 0.2 then
-        createWall(prevPoint, v.points[1])
+        endWall = createWall(prevPoint, v.points[1])
       end
+    end
+    if endWall != nil then
+      angle = math.atan2(prevPoint.x - v.points[1].x, prevPoint.z - v.points[1].z)
+      angle = math.deg(angle)
+      endWall.setRotation({0, (angle + angleMod), 0})
     end
   end
 end
@@ -100,6 +116,7 @@ function createWall(p1, p2)
   })
   box.addTag("QuickDungeon Wall")
   box.setColorTint(Color.fromString("Grey"))
+  return box
 end
 
 function deleteWalls(walls)
@@ -160,9 +177,6 @@ function callbackSinglePlane(box, p1, p2)
     return nil
   end
   setSuperLock(box, true)
-  angle = math.atan2(p1.x - p2.x, p1.z - p2.z)
-  angle = math.deg(angle)
-  box.setRotation({0, angle + 180, 0})
   box.setScale({0.1, 0.2, p1:distance(p2) * 0.075})
   setSuperLock(box, true)
 end
