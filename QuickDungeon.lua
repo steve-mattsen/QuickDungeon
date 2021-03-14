@@ -31,7 +31,7 @@ function collectLines( allLines )
     return allLines;
   end
 
-  local bounds = calcBbox(self)
+  local bounds = bboxObj(self)
 
   local result = {}
   for i,v in pairs(allLines) do
@@ -116,10 +116,10 @@ function collectWalls()
     return walls
   end
   local result = {}
-  local bbox = calcBbox(self)
+  local bbox = bboxObj(self)
   debug("Checking bounding boxes with plate.", 2)
   for i, v in pairs(walls) do
-    if boundsOverlap(bbox, calcBbox(v)) == true then
+    if boundsOverlap(bbox, bboxObj(v)) == true then
       table.insert(result, v)
     end
   end
@@ -239,7 +239,7 @@ function boundsOverlap(bbox1, bbox2)
   return true
 end
 
-function calcBbox(obj)
+function bboxObj(obj)
   local b = obj.getBounds()
   local halfWidth = (b.size.x / 2)
   local halfHeight = (b.size.z / 2)
@@ -254,4 +254,14 @@ function calcBbox(obj)
       z = b.center.z + halfHeight
     }
   }
+end
+
+function bboxLineObj(line)
+  -- Returns the bounding box of a line object.
+  -- Note that this is different from a line segment.
+  -- A line object is a group of line segments from one draw action in TTS.
+end
+
+function bboxLineSeg(lineSeg)
+  -- Checks the min and max values of both points, returns a bounding box.
 end
