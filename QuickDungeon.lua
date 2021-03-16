@@ -186,13 +186,13 @@ function callbackSinglePlane(box, p1, p2)
   setSuperLock(box, true)
 end
 
-function makeBoundingBoxes(lines)
+function makeBoundingBoxes(lineObjs)
   debug('Making bounding boxes for drawn objects', 1)
-  if lines == nil then
+  if lineObjs == nil then
     return nil
   end
   local result = {}
-  for i, v in pairs(lines) do
+  for i, v in pairs(lineObjs) do
     local maxX, maxZ = -10000, -10000
     local minX, minZ = 10000, 10000
     debug('Finding bounds for line ' .. i .. ": " .. dump(v), 3)
