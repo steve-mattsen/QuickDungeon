@@ -60,8 +60,10 @@ function makeWalls(lines)
     local angleMod = 0
     if v.loop == true then
       if (#v.points == 4) then
+        -- It's a rectangle object
         angleMod = 0
       else
+        -- It's a circle object
         angleMod = 180
       end
     elseif #v.points > 2 then
@@ -83,8 +85,10 @@ function makeWalls(lines)
     pointCount = #v.points
     local endWall = nil
     if v.loop == true then
+      -- We know the end points should be connected. Carry on.
       endWall = createWall(prevPoint, v.points[1], v.color)
-    elseif pointCount > 2 then
+    elseif #v.points > 2 then
+      -- It's a free-form line. They might need connecting.
       debug('Determining if first and last points should be connected.', 2)
       -- Connect the first and last points if they're close enough.
       diffX = math.abs(prevPoint.x - v.points[1].x)
