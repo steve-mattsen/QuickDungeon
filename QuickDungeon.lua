@@ -284,3 +284,25 @@ end
 function bboxLineSeg(lineSeg)
   -- Checks the min and max values of both points, returns a bounding box.
 end
+
+function linesIntersect(line1, line2)
+  -- Equations taken from https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line_segment
+  -- t = (x1-x3)(y3-y4) - (y1-y3)(x3-x4) / (x1-x2)(y3-y4) - (y1-y2)(x3-x4)
+  -- u = (x2-x1)(y1-y3) - (y2-y1)(x1-x3) / (x1-x2)(y3-y4) - (y1-y2)(x3-x4)
+  local g1 = (line1[1].x - line2[1].x) * (line2[1].z - line2[2].z)
+  g1 = g1 - ((line1[1].z - line2[1].z) * (line2[1].x - line2[2].x))
+  local g2 = (line1[1].x - line1[2].x) * (line2[1].z - line2[2].z)
+  g2 = g2 - ((line1[1].z - line1[2].z) * (line2[1].x - line2[2].x))
+  local g3 = (line1[2].x - line1[1].x) * (line1[1].z - line2[1].z)
+  g3 = g3 - ((line1[2].z - line1[1].z) * (line1[1].x - line2[1].x))
+  local t = g1 / g2
+  local u = g3 / g2
+  if t < 0 or t > 1 or u < 0 or u > 1 then
+    return false
+  end
+  return {
+    x = line1[1].x + (t * (line1[2].x - line1[1].x)),
+    y = 0,
+    z = line1[1].z + (t * (line1[2].z - line1[1].z))
+  }
+end
