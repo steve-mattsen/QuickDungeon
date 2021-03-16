@@ -64,6 +64,9 @@ function makeWalls(lines)
       else
         angleMod = 180
       end
+    elseif #v.points > 2 then
+      --It's a free-form line. Let's simplify and clean up the lines.
+       v.points = cleanLineObj(v.points)
     end
     for pi, pv in pairs(v.points) do
       if prevPoint == nil then
@@ -305,4 +308,17 @@ function linesIntersect(line1, line2)
     y = 0,
     z = line1[1].z + (t * (line1[2].z - line1[1].z))
   }
+end
+
+function cleanLineObj(points)
+  local currentPoint = points[1]
+  local result = { currentPoint }
+  local minDistance = 0.33a
+  for i, v in pairs(points) do
+    if currentPoint:distance(v) >= minDistance then
+      table.insert(result, v)
+      currentPoint = v
+    end
+  end
+  return result
 end
