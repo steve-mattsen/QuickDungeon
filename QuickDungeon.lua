@@ -111,7 +111,6 @@ function makeWalls(lines)
       end
     end
 
-    pointCount = #v.points
     -- Figure out what to do about the end points.
     local endWall = nil
     if v.loop == true then
@@ -136,10 +135,12 @@ function makeWalls(lines)
 end
 
 function createWall(p1, p2, color)
+  p1 = Vector(p1)
+  p2 = Vector(p2)
   if color == nil then
     color = Color.fromString("White")
   end
-  debug('Creating wall.', 2)
+  debug('Creating wall from ' .. dump(p1) .. ' to ' .. dump(p2), 2)
   local pos = p1:lerp(p2, 0.5);
   local box = spawnObject({
     type = "Custom_Model",
@@ -352,10 +353,9 @@ function cleanLineObj(points)
     if currentPoint:distance(v) >= minDistance then
       table.insert(result, v)
       currentPoint = v
-    else if i == #points then
+    elseif i == #points then
       -- Always insert the last point.
       table.insert(result, v)
-    end
     end
   end
   return result
