@@ -44,7 +44,7 @@ function pingLine(line)
   Player.getPlayers()[1].pingTable(line.points[1]:lerp(line.points[2], 0.5))
 end
 
-setDebug(2)
+setDebug(0)
 -- level 0: no debug
 -- Level 1: function calls
 -- level 2: Loops and major events
