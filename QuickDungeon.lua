@@ -220,7 +220,7 @@ function callbackSinglePlane(box, p1, p2)
     return nil
   end
   setSuperLock(box, true)
-  box.setScale({0.1, 0.2, p1:distance(p2) * 0.0714286}) -- 1 / 14, width of walls.
+  box.setScale({0.1, 0.2, p1:distance(p2) * (1/14)}) -- 1 / 14, width of walls.
   setSuperLock(box, true)
 end
 
