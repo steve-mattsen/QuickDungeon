@@ -1,7 +1,7 @@
 -- QuickDungeon by Steve Mattsen
 -- Version 0.1.6
 #include QuickDungeon\debug
-#include QuickDungeon\bbox
+#include QuickDungeon\geometry
 
 vars = {
   createFromAllLines = false,
