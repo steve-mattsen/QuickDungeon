@@ -2,17 +2,15 @@ function bboxObj(obj)
   local b = obj.getBounds()
   local halfWidth = (b.size.x / 2)
   local halfHeight = (b.size.z / 2)
-  return {
-    {
-      x = b.center.x - halfWidth,
-      y = 0,
-      z = b.center.z - halfHeight
-    }, {
-      x = b.center.x + halfWidth,
-      y = 0,
-      z = b.center.z + halfHeight
-    }
-  }
+  return { Vector(
+      b.center.x - halfWidth,
+      0,
+      b.center.z - halfHeight
+    ), Vector(
+      b.center.x + halfWidth,
+      0,
+      b.center.z + halfHeight
+  )}
 end
 
 function bboxLineObj(line)
