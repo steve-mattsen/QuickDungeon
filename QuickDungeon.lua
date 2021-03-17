@@ -322,6 +322,10 @@ function cleanLineObj(points)
     if currentPoint:distance(v) >= minDistance then
       table.insert(result, v)
       currentPoint = v
+    else if i == #points then
+      -- Always insert the last point.
+      table.insert(result, v)
+    end
     end
   end
   return result
