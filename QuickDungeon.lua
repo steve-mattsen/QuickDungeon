@@ -317,7 +317,7 @@ end
 function cleanLineObj(points)
   local currentPoint = points[1]
   local result = { currentPoint }
-  local minDistance = 0.33a
+  local minDistance = 0.33
   for i, v in pairs(points) do
     if currentPoint:distance(v) >= minDistance then
       table.insert(result, v)
