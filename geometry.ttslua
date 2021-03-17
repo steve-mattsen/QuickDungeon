@@ -19,10 +19,32 @@ function bboxLineObj(line)
   -- Returns the bounding box of a line object.
   -- Note that this is different from a line segment.
   -- A line object is a group of line segments from one draw action in TTS.
+  return bboxFromPoints(line.points)
 end
 
 function bboxLineSeg(lineSeg)
   -- Checks the min and max values of both points, returns a bounding box.
+end
+
+function bboxFromPoints(points)
+  local bbox = {
+    Vector(math.huge * -1, 0, math.huge * -1),
+    Vector(math.huge, 0, math.huge)
+  }
+  for i,v in pairs(points) do
+    if v.x < bbox[1].x then
+      bbox[1].x = v.x
+    end
+    if v.x > bbox[2].x then
+      bbox[2].x = v.x
+    end
+    if v.y < bbox[1].y then
+      bbox[1].y = v.y
+    end
+    if v.y > bbox[2].y then
+      bbox[2].y = v.y
+    end
+  end
 end
 
 function isInBounds(point, bounds)
