@@ -72,34 +72,7 @@ function makeWalls(lines)
       --It's a free-form line. Let's simplify and clean up the lines.
        v.points = cleanLineObj(v.points)
       --Now let's see if the end points (or close to them) intersect.
-      local intersect = false
-      for j = 1, 3, 1 do
-        for jj = 0, 2, 1 do
-          local first = {
-            v.points[j],
-            v.points[j+1]
-          }
-          local last = {
-            v.points[#v.points-jj],
-            v.points[#v.points-(jj+1)],
-          }
-          intersect = linesIntersect(first, last)
-          if intersect != false then
-            -- Remove extra end points.
-            for k = 0, jj, 1 do
-              table.remove(v.points)
-            end
-            for k = 0, j, 1 do
-              table.remove(v.points, 1)
-            end
-            -- Connect end points at intersection.
-            v.points[1] = intersect
-            v.points[#v.points] = intersect
-            break
-          end
-        end
-        if intersect != false then break end
-      end
+      v.points = cleanEndPoints(v.points)
     end
     for pi, pv in pairs(v.points) do
       if prevPoint == nil then
@@ -280,4 +253,35 @@ function cleanLineObj(points)
     end
   end
   return result
+end
+
+function cleanEndPoints(points)
+  local intersect = false
+  for i = 1, 3, 1 do
+    for ii = 0, 2, 1 do
+      local first = {
+        points[i],
+        points[i+1]
+      }
+      local last = {
+        points[#points-ii],
+        points[#points-(ii+1)],
+      }
+      intersect = linesIntersect(first, last)
+      if intersect != false then
+        -- Remove extra end points.
+        for j = 0, ii, 1 do
+          table.remove(points)
+        end
+        for j = 0, i, 1 do
+          table.remove(points, 1)
+        end
+        -- Connect end points at intersection.
+        points[1] = intersect
+        points[#points] = intersect
+        return points
+      end
+    end
+  end
+  return points
 end
