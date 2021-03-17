@@ -24,16 +24,16 @@ function setDebug(level)
 end
 
 function dump(o)
-   if type(o) == 'table' then
-      local s = '{ '
-      for k,v in pairs(o) do
-         if type(k) ~= 'number' then k = '"'..k..'"' end
-         s = s .. '['..k..'] = ' .. dump(v) .. ','
-      end
-      return s .. '} '
-   else
-      return tostring(o)
-   end
+  if type(o) == 'table' then
+    local result = ""
+    for i, v in pairs(o) do
+      result = result .. JSON.encode(v) .. ", "
+    end
+    return result
+  elseif type(o) != 'string' then
+    o = JSON.encode(o)
+  end
+  return o
 end
 
 function out(msg)
@@ -41,7 +41,20 @@ function out(msg)
 end
 
 function pingLine(line)
-  Player.getPlayers()[1].pingTable(line.points[1]:lerp(line.points[2], 0.5))
+  if line.points != nil then
+    line.points[1] = Vector(line.points[1])
+    line.points[2] = Vector(line.points[2])
+    Player.getPlayers()[1].pingTable(line.points[1]:lerp(line.points[2], 0.5))
+  else
+    line[1] = Vector(line[1])
+    line[2] = Vector(line[2])
+    Player.getPlayers()[1].pingTable(line[1]:lerp(line[2], 0.5))
+  end
+end
+
+function pingPoint(point)
+  point = Vector(point)
+  Player.getPlayers()[1].pingTable(point)
 end
 
 setDebug(0)
