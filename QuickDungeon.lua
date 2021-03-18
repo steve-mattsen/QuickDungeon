@@ -33,12 +33,12 @@ function collectLines( allLines )
     return allLines;
   end
 
-  local bounds = bboxObj(self)
+  local bbox = bboxObj(self)
 
   local result = {}
   for i,v in pairs(allLines) do
     debug('Checking plate boundaries with point ' .. i, 2)
-    inBounds = boundsOverlap(bounds, v.bounds)
+    inBounds = boundsOverlap(bbox, v.bbox)
 
     if inBounds then
       table.insert(result, v)
@@ -190,38 +190,10 @@ function makeBoundingBoxes(lineObjs)
   if lineObjs == nil then
     return nil
   end
-  local result = {}
   for i, v in pairs(lineObjs) do
-    local maxX, maxZ = -10000, -10000
-    local minX, minZ = 10000, 10000
-    debug('Finding bounds for line ' .. i .. ": " .. dump(v), 3)
-    for pi, pv in pairs(v.points) do
-      debug('Point number ' .. pi .. ': ' .. dump(pv), 3)
-      if pv.x > maxX then
-        maxX = pv.x
-      end
-      if pv.x < minX then
-        minX = pv.x
-      end
-      if pv.z > maxZ then
-        maxZ = pv.z
-      end
-      if pv.z < minZ then
-        minZ = pv.z
-      end
-    end
-    debug('Bounds now set to: ' .. minX .. ', ' .. minZ .. ' -> ' .. maxX .. ', ' .. maxZ, 2)
-    if debugLevel >= 3 then
-      Player["White"].pingTable({minX, 0, minZ})
-      Player["White"].pingTable({maxX, 0, maxZ})
-    end
-    v.bounds = {
-      {x=minX, y=0, z=minZ},
-      {x=maxX, y=0, z=maxZ}
-    }
-    table.insert(result, v)
+    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 3)
+    v.bbox = bboxLineObj(v)
   end
-  return result
 end
 
 function setSuperLock(obj, state)
