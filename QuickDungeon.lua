@@ -48,8 +48,8 @@ function collectLines( allLines )
   local bbox = bboxObj(self)
   local result = {}
   for i,v in pairs(allLines) do
-    inBounds = boundsOverlap(bbox, v.bbox)
     debug('Checking plate boundaries with line ' .. i, 2)
+    local inBounds = boundsOverlap(bbox, v.bbox)
 
     if inBounds then
       table.insert(result, v)
