@@ -27,6 +27,18 @@ function deleteWallsButtonClick()
   deleteWalls(collectWalls())
 end
 
+function makeBoundingBoxes(lineObjs)
+  debug('Making bounding boxes for drawn objects', 1)
+  if lineObjs == nil then
+    return nil
+  end
+  for i, v in pairs(lineObjs) do
+    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 3)
+    v.bbox = bboxLineObj(v)
+    debug(v.bbox)
+  end
+end
+
 function collectLines( allLines )
   debug('Filtering out unneessary lines.', 1)
   if vars['affectGlobal'] == true then
@@ -47,6 +59,23 @@ function collectLines( allLines )
   if #result == 0 then
     out("Detected no lines under the plate.")
     return nil
+  end
+  return result
+end
+
+function collectWalls()
+  debug("Collecting walls", 1)
+  local walls = getObjectsWithTag("QuickDungeon Wall")
+  if vars['affectGlobal'] == true then
+    return walls
+  end
+  local result = {}
+  local bbox = bboxObj(self)
+  debug("Checking bounding boxes with plate.", 2)
+  for i, v in pairs(walls) do
+    if boundsOverlap(bbox, bboxObj(v)) == true then
+      table.insert(result, v)
+    end
   end
   return result
 end
@@ -144,23 +173,6 @@ function deleteWalls(walls)
   end
 end
 
-function collectWalls()
-  debug("Collecting walls", 1)
-  local walls = getObjectsWithTag("QuickDungeon Wall")
-  if vars['affectGlobal'] == true then
-    return walls
-  end
-  local result = {}
-  local bbox = bboxObj(self)
-  debug("Checking bounding boxes with plate.", 2)
-  for i, v in pairs(walls) do
-    if boundsOverlap(bbox, bboxObj(v)) == true then
-      table.insert(result, v)
-    end
-  end
-  return result
-end
-
 function die()
   self.destruct()
   debug("Deleted self.", 1)
@@ -183,17 +195,6 @@ function callbackSinglePlane(box, p1, p2)
   setSuperLock(box, true)
   box.setScale({0.1, 0.2, p1:distance(p2) * (1/14)}) -- 1 / 14, width of walls.
   setSuperLock(box, true)
-end
-
-function makeBoundingBoxes(lineObjs)
-  debug('Making bounding boxes for drawn objects', 1)
-  if lineObjs == nil then
-    return nil
-  end
-  for i, v in pairs(lineObjs) do
-    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 3)
-    v.bbox = bboxLineObj(v)
-  end
 end
 
 function setSuperLock(obj, state)
