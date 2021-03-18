@@ -46,7 +46,6 @@ function collectLines( allLines )
   debug('Filtering out unneessary lines.', 1)
 
   local bbox = bboxObj(self)
-
   local result = {}
   for i,v in pairs(allLines) do
     inBounds = boundsOverlap(bbox, v.bbox)
@@ -84,8 +83,7 @@ function makeWalls(lines)
   debug('Creating the calculated walls.', 1)
   if lines == nil then
      return nil
-   end
-
+  end
   for i, v in pairs(lines) do
     local prevPoint = nil
     local angleMod = 0
