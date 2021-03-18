@@ -35,22 +35,22 @@ function makeBoundingBoxes(lineObjs)
   for i, v in pairs(lineObjs) do
     debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 3)
     v.bbox = bboxLineObj(v)
-    debug(v.bbox)
   end
 end
 
 function collectLines( allLines )
-  debug('Filtering out unneessary lines.', 1)
   if vars['affectGlobal'] == true then
+    debug('Collecting all lines in Global.', 1)
     return allLines;
   end
+  debug('Filtering out unneessary lines.', 1)
 
   local bbox = bboxObj(self)
 
   local result = {}
   for i,v in pairs(allLines) do
-    debug('Checking plate boundaries with point ' .. i, 2)
     inBounds = boundsOverlap(bbox, v.bbox)
+    debug('Checking plate boundaries with line ' .. i, 2)
 
     if inBounds then
       table.insert(result, v)
@@ -81,7 +81,7 @@ function collectWalls()
 end
 
 function makeWalls(lines)
-    debug('Creating the calculated walls.', 1)
+  debug('Creating the calculated walls.', 1)
   if lines == nil then
      return nil
    end
