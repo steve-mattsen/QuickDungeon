@@ -27,8 +27,8 @@ end
 
 function bboxFromPoints(points)
   local bbox = {
-    Vector(math.huge * -1, 0, math.huge * -1),
-    Vector(math.huge, 0, math.huge)
+    Vector(math.huge, 0, math.huge),
+    Vector(math.huge * -1, 0, math.huge * -1)
   }
   for i,v in pairs(points) do
     if v.x < bbox[1].x then
@@ -37,13 +37,14 @@ function bboxFromPoints(points)
     if v.x > bbox[2].x then
       bbox[2].x = v.x
     end
-    if v.y < bbox[1].y then
-      bbox[1].y = v.y
+    if v.z < bbox[1].z then
+      bbox[1].z = v.z
     end
-    if v.y > bbox[2].y then
-      bbox[2].y = v.y
+    if v.z > bbox[2].z then
+      bbox[2].z = v.z
     end
   end
+  return bbox
 end
 
 function isInBounds(point, bounds)
