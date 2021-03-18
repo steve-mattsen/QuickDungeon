@@ -79,11 +79,38 @@ function collectWalls()
   return result
 end
 
+function groupLines(lines)
+  debug('Sorting lines into groups', 1)
+  local groups = {}
+  while #lines > 0 do
+    local group = {}
+    local line = table.remove(lines)
+    table.insert(group, line)
+    groupLinesByBbox(group, lines, line.bbox)
+    table.insert(groups, group)
+  end
+  return groups
+end
+
+function groupLinesByBbox(group, lines, bbox)
+  -- Recursive function which will populate group with the first line and any lines that overlap its bbox.
+  -- Will remove the line from lines if grouped.
+  for i, v in pairs(lines) do
+    --Check if the line overlaps
+    if boundsOverlap( bbox, v.bbox ) == true then
+      table.remove(lines, i);
+      table.insert(group, v)
+      groupLinesByBbox(group, lines, v.bbox)
+    end
+  end
+end
 function makeWalls(lines)
   debug('Creating the calculated walls.', 1)
   if lines == nil then
      return nil
   end
+  -- Make line groups based on bbox collision.
+  local groups = groupLines(lines)
   for i, v in pairs(lines) do
     local prevPoint = nil
     local angleMod = 0
