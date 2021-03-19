@@ -47,15 +47,18 @@ function bboxFromPoints(points)
   return bbox
 end
 
-function isInBounds(point, bounds)
-  -- Bounds is a two-point table. Top right and bottom left in that order
-  if point.x > bounds[1].x then
+function isInBounds(point, bounds, boundsOffset)
+  if boundsOffset == nil then
+    boundsOffset = 0
+  end
+  -- Bounds is a two-point table. Bottom left and top right in that order
+  if point.x < bounds[1].x then
     return false
-  elseif point.x < bounds[2].x then
+  elseif point.x > bounds[2].x then
     return false
-  elseif point.z > bounds[1].z then
+  elseif point.z < bounds[1].z then
     return false
-  elseif point.z < bounds[2].z then
+  elseif point.z > bounds[2].z then
     return false
   end
   return true
