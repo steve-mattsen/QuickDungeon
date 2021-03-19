@@ -158,3 +158,41 @@ function makeBboxLineObj(bbox)
   table.insert(nl.points, Vector(bbox[2].x, 1, bbox[1].z))
   return nl
 end
+
+function lineObjIntersectionsInBbox(lineObj1, lineObj2, bbox)
+  points1 = selectPointsInLineObj(v, olap.bbox, true)
+  points2 = selectPointsInLineObj(caller, olap.bbox, true)
+  debug('points1: ' .. dump(points1))
+  debug('points2: ' .. dump(points2))
+  local prevPoint1 = nil
+  local prevPoint2 = nil
+  local intersections = {}
+  local isect = false
+  for pi1, pv1 in pairs(points1) do
+    if pi1 == 1 then goto continue1 end
+
+    prevPoint2 = nil
+    for pi2, pv2 in pairs(points2) do
+      if pi2 == 1 then goto continue2 end
+
+      --Check intersections with all lines
+      isect = linesIntersect(
+        {prevPoint1, pv1},
+        {prevPoint2, pv2}
+      )
+      if isect ~= false then
+        isect.line1 = { prevPoint1, pv1 }
+        isect.line2 = { prevPoint2, pv2 }
+        table.insert(intersections, isect)
+        pingPoint(isect)
+      end
+
+      ::continue2::
+      prevPoint2 = pv2
+    end
+
+    ::continue1::
+    prevPoint1 = pv1
+  end
+  return intersections
+end
