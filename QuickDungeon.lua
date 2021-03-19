@@ -16,10 +16,19 @@ function onLoad(save_state)
 end
 
 function makeWallButtonClick()
-  debug('Starting the make wall process', 1)
-  lines = Global.getVectorLines()
-  makeBoundingBoxes(lines)
-  lines = collectLines(lines)
+  debug('Create button clicked.', 1)
+  local lines = Global.getVectorLines()
+  -- Prepare
+  prepareLineObjs(lines)
+  -- Collect
+  lines = collectLineObjs(lines)
+  if lines == nil then
+    return
+  end
+  -- Sanitize
+  sanitizeLineObjs(lines)
+  -- Analyze
+  -- Action
   makeWalls(lines)
 end
 
@@ -27,23 +36,24 @@ function deleteWallsButtonClick()
   deleteWalls(collectWalls())
 end
 
-function makeBoundingBoxes(lineObjs)
-  debug('Making bounding boxes for drawn objects', 1)
+function prepareLineObjs(lineObjs)
+  debug('Making bounding boxes for line objects', 1)
   if lineObjs == nil then
     return nil
   end
   for i, v in pairs(lineObjs) do
-    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 3)
+    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 2)
+    v.id = i
     v.bbox = bboxLineObj(v)
   end
 end
 
-function collectLines( allLines )
+function collectLineObjs( allLines )
   if vars['affectGlobal'] == true then
-    debug('Collecting all lines in Global.', 1)
+    debug('Collecting all line objects in Global.', 1)
     return allLines;
   end
-  debug('Filtering out unneessary lines.', 1)
+  debug('Filtering out all line objects not under plate.', 1)
 
   local bbox = bboxObj(self)
   local result = {}
@@ -77,6 +87,17 @@ function collectWalls()
     end
   end
   return result
+end
+
+function sanitizeLineObjs(lineObjs)
+  for i,v in pairs(lineObjs) do
+    if #v.points > 2 and v.loop == false then
+     --It's a free-form line. Let's simplify and clean up the lines.
+      v.points = cleanLineObj(v.points)
+     --Now let's see if the end points (or close to them) intersect.
+      v.points = cleanEndPoints(v.points)
+    end
+  end
 end
 
 function groupLines(lines)
@@ -122,11 +143,6 @@ function makeWalls(lines)
         -- It's a circle object
         angleMod = 180
       end
-    elseif #v.points > 2 then
-      --It's a free-form line. Let's simplify and clean up the lines.
-       v.points = cleanLineObj(v.points)
-      --Now let's see if the end points (or close to them) intersect.
-      v.points = cleanEndPoints(v.points)
     end
     for pi, pv in pairs(v.points) do
       if prevPoint == nil then
