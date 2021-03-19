@@ -57,6 +57,18 @@ function pingPoint(point)
   Player.getPlayers()[1].pingTable(point)
 end
 
+function pingPoints(points)
+  for i, v in pairs(points) do
+    pingPoint(v)
+  end
+end
+
+function pingBox(bbox)
+  pingPoint(bbox[1].x, 0, bbox[1].z))
+  pingPoint(bbox[1].x, 0, bbox[2].z))
+  pingPoint(bbox[2].x, 0, bbox[2].z))
+  pingPoint(bbox[2].x, 0, bbox[1].z))
+end
 setDebug(0)
 -- level 0: no debug
 -- Level 1: function calls
