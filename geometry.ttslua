@@ -196,3 +196,33 @@ function lineObjIntersectionsInBbox(lineObj1, lineObj2, bbox)
   end
   return intersections
 end
+
+function selectPointsInLineObj(lineObj, bbox, includeConnected)
+  if includeConnected == nil then
+    includeConnected = false
+  end
+  local result = {}
+  local prevPoint = lineObj.points[#lineObj.points]
+  local prevPointWasInBounds = isInBounds(lineObj.points[#lineObj.points], bbox)
+  for i,v in pairs(lineObj.points) do
+    if isInBounds(v, bbox) == true then
+      -- debug("Point is in bounds.")
+      if prevPointWasInBounds == false and includeConnected then
+        table.insert(result, prevPoint)
+      end
+      table.insert(result, v)
+      prevPointWasInBounds = true
+    else
+      -- debug("Point is not in bounds.")
+      if prevPointWasInBounds == true and i ~= #lineObj.points then
+        -- Look ahead to see if the next one will be in bounds and don't add twice.
+        if isInBounds(lineObj.points[i+1], bbox) == false then
+          table.insert(result, v)
+        end
+      end
+      prevPointWasInBounds = false
+    end
+    prevPoint = v
+  end
+  return result
+end
