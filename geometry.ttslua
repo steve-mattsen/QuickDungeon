@@ -138,9 +138,11 @@ function linesIntersect(line1, line2)
   if t < 0 or t > 1 or u < 0 or u > 1 then
     return false
   end
-  return {
-    x = line1[1].x + (t * (line1[2].x - line1[1].x)),
-    y = 0,
-    z = line1[1].z + (t * (line1[2].z - line1[1].z))
+  return Vector(
+    line1[1].x + (t * (line1[2].x - line1[1].x)),
+    0,
+    line1[1].z + (t * (line1[2].z - line1[1].z))
+  )
+end
   }
 end
