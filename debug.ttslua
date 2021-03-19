@@ -27,7 +27,7 @@ function dump(o)
   if type(o) == 'table' then
     local result = ""
     for i, v in pairs(o) do
-      result = result .. JSON.encode(v) .. ", "
+      result = result .. i .. ": \t" .. JSON.encode(v) .. ", \r\n"
     end
     return result
   elseif type(o) != 'string' then
