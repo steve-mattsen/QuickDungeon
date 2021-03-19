@@ -64,8 +64,18 @@ function isInBounds(point, bounds, boundsOffset)
   return true
 end
 
-function boundsOverlap(bbox1, bbox2)
+function boundsOverlap(bbox1, bbox2, fullCalc)
+  -- Checks whether the bounding boxes overlap.
+  -- If they do, returns a bounding box describing their overlap area.
   -- Assumes bbox1 and 2 are two points in {lowerLeft, upperRight} format.
+  -- fullCalc is a bool.
+  -- If true, will calculate and return the bounding box (even if negative.)
+  -- Will also return the length, height and area of the resulting bbox.
+  -- Otherwise, will cheaply just return true / false without calculating.
+  if fullCalc == nil then
+    fullCalc = false
+  end
+  if fullCalc == false then
   if bbox1[1].z > bbox2[2].z then
     -- bbox1 is above bbox2
     return false
@@ -80,6 +90,37 @@ function boundsOverlap(bbox1, bbox2)
     return false
   end
   return true
+end
+  --We're fully calculating.
+  local oBox = {
+    Vector(bbox1[1].x, 0, bbox1[1].z),
+    Vector(bbox1[2].x, 0, bbox1[2].z)
+  }
+  -- Let's find the highest low points.
+  if bbox2[1].x > bbox1[1].x then
+    oBox[1].x = bbox2[1].x
+  end
+  if bbox2[1].z > bbox1[1].z then
+    oBox[1].z = bbox2[1].z
+  end
+  -- Now the lowest high points.
+  if bbox2[2].x < bbox1[2].x then
+    oBox[2].x = bbox2[2].x
+  end
+  if bbox2[2].z < bbox1[2].z then
+    oBox[2].z = bbox2[2].z
+  end
+  -- We now have an overlap box.
+  local o = {
+    bbox = oBox,
+    length = oBox[2].x - oBox[1].x,
+    height = oBox[2].z - oBox[1].z,
+  }
+  o.area = o.length * o.height
+  if o.length < 0 and o.height < 0 then
+    o.area = o.area * -1
+  end
+  return o
 end
 
 function linesIntersect(line1, line2)
