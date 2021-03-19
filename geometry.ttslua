@@ -144,5 +144,17 @@ function linesIntersect(line1, line2)
     line1[1].z + (t * (line1[2].z - line1[1].z))
   )
 end
+
+function makeBboxLineObj(bbox)
+  local nl = {
+    points = {},
+    loop = true,
+    color = {1, 0.2, 0.2},
+    thickness = 0.05
   }
+  table.insert(nl.points, Vector(bbox[1].x, 1, bbox[1].z))
+  table.insert(nl.points, Vector(bbox[1].x, 1, bbox[2].z))
+  table.insert(nl.points, Vector(bbox[2].x, 1, bbox[2].z))
+  table.insert(nl.points, Vector(bbox[2].x, 1, bbox[1].z))
+  return nl
 end
