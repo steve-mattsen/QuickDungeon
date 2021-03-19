@@ -16,10 +16,20 @@ function onLoad(save_state)
 end
 
 function makeWallButtonClick()
-  debug('Starting the make wall process', 1)
-  lines = Global.getVectorLines()
-  makeBoundingBoxes(lines)
-  lines = collectLines(lines)
+  debug('Create button clicked.', 1)
+  local lines = Global.getVectorLines()
+  -- Prepare
+  prepareLineObjs(lines)
+  -- Collect
+  lines = collectLineObjs(lines)
+  if lines == nil then
+    return
+  end
+  -- Sanitize
+  sanitizeLineObjs(lines)
+  -- Analyze
+  local groups = groupLineObjs(lines)
+  -- Action
   makeWalls(lines)
 end
 
@@ -27,23 +37,24 @@ function deleteWallsButtonClick()
   deleteWalls(collectWalls())
 end
 
-function makeBoundingBoxes(lineObjs)
-  debug('Making bounding boxes for drawn objects', 1)
+function prepareLineObjs(lineObjs)
+  debug('Making bounding boxes for line objects', 1)
   if lineObjs == nil then
     return nil
   end
   for i, v in pairs(lineObjs) do
-    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 3)
+    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 2)
+    v.id = i
     v.bbox = bboxLineObj(v)
   end
 end
 
-function collectLines( allLines )
+function collectLineObjs( allLines )
   if vars['affectGlobal'] == true then
-    debug('Collecting all lines in Global.', 1)
+    debug('Collecting all line objects in Global.', 1)
     return allLines;
   end
-  debug('Filtering out unneessary lines.', 1)
+  debug('Filtering out all line objects not under plate.', 1)
 
   local bbox = bboxObj(self)
   local result = {}
@@ -79,31 +90,168 @@ function collectWalls()
   return result
 end
 
-function groupLines(lines)
+function sanitizeLineObjs(lineObjs)
+  for i,v in pairs(lineObjs) do
+    if #v.points > 2 and v.loop == false then
+     --It's a free-form line. Let's simplify and clean up the lines.
+      v.points = cleanLineObj(v.points)
+     --Now let's see if the end points (or close to them) intersect.
+      v.points = cleanEndPoints(v.points)
+   end
+  end
+end
+
+function groupLineObjs(lineObjs)
+  -- Marks out all the intersections, makes a conneted point map with object indexes.
   debug('Sorting lines into groups', 1)
   local groups = {}
-  while #lines > 0 do
+  while #lineObjs > 0 do
     local group = {}
-    local line = table.remove(lines)
-    table.insert(group, line)
-    groupLinesByBbox(group, lines, line.bbox)
+    local lo = table.remove(lineObjs)
+    table.insert(group, lo)
+    groupLinesByBbox(group, lineObjs, lo)
     table.insert(groups, group)
   end
+  makeGroupIntersections(groups)
   return groups
 end
 
-function groupLinesByBbox(group, lines, bbox)
-  -- Recursive function which will populate group with the first line and any lines that overlap its bbox.
-  -- Will remove the line from lines if grouped.
-  for i, v in pairs(lines) do
+function groupLinesByBbox(group, lineObjs, caller)
+  debug("GroupLinesByBbox")
+  -- Recursive function which will populate group with the first lineObjs and any lineObjs that overlap its bbox.
+  -- Will remove the lineObj from lineObjs if grouped.
+  local intersections = {}
+  for i, v in pairs(lineObjs) do
+    debug("LineObj " .. i)
     --Check if the line overlaps
-    if boundsOverlap( bbox, v.bbox ) == true then
-      table.remove(lines, i);
+    olap = boundsOverlap( caller.bbox, v.bbox, true)
+    if olap.area >= 0 then
+      -- Check the area to see if the line objects actually intersect.
+      -- First get all points in the area, along with one before and after.
+      table.remove(lineObjs, i);
       table.insert(group, v)
-      groupLinesByBbox(group, lines, v.bbox)
+      groupLinesByBbox(group,lineObjs,v)
     end
   end
 end
+--
+-- function makeGroupIntersections(groups)
+--   -- Add
+--   for gi, grp in pairs(groups) do
+--     for i, v in pairs(grp) do
+--       -- Get the
+--       olap = boundsOverlap( )
+--
+--     end
+--   end
+-- end
+
+function selectPointsInLineObj(lineObj, bbox, includeConnected)
+  if includeConnected == nil then
+    includeConnected = false
+  end
+  local result = {}
+  local prevPoint = lineObj.points[#lineObj.points]
+  local prevPointWasInBounds = isInBounds(lineObj.points[#lineObj.points], bbox)
+  for i,v in pairs(lineObj.points) do
+    if isInBounds(v, bbox) == true then
+      -- debug("Point is in bounds.")
+      if prevPointWasInBounds == false and includeConnected then
+        table.insert(result, prevPoint)
+      end
+      table.insert(result, v)
+      prevPointWasInBounds = true
+    else
+      -- debug("Point is not in bounds.")
+      if prevPointWasInBounds == true and i ~= #lineObj.points then
+        -- Look ahead to see if the next one will be in bounds and don't add twice.
+        if isInBounds(lineObj.points[i+1], bbox) == false then
+          table.insert(result, v)
+        end
+      end
+      prevPointWasInBounds = false
+    end
+    prevPoint = v
+  end
+  return result
+end
+
+function lineObjIntersectionsInBbox(lineObj1, lineObj2, bbox)
+  points1 = selectPointsInLineObj(v, olap.bbox, true)
+  points2 = selectPointsInLineObj(caller, olap.bbox, true)
+  debug('points1: ' .. dump(points1))
+  debug('points2: ' .. dump(points2))
+  local prevPoint1 = nil
+  local prevPoint2 = nil
+  local intersections = {}
+  local isect = false
+  for pi1, pv1 in pairs(points1) do
+    if pi1 == 1 then goto continue1 end
+
+    prevPoint2 = nil
+    for pi2, pv2 in pairs(points2) do
+      if pi2 == 1 then goto continue2 end
+
+      --Check intersections with all lines
+      isect = linesIntersect(
+        {prevPoint1, pv1},
+        {prevPoint2, pv2}
+      )
+      if isect ~= false then
+        isect.line1 = { prevPoint1, pv1 }
+        isect.line2 = { prevPoint2, pv2 }
+        table.insert(intersections, isect)
+        pingPoint(isect)
+      end
+
+      ::continue2::
+      prevPoint2 = pv2
+    end
+
+    ::continue1::
+    prevPoint1 = pv1
+  end
+  return intersections
+end
+
+function encloseGroups(groups)
+  local leftOvers = {}
+  for i,g in pairs(groups) do
+    -- v is a group. v[1] is the first lineObj.
+    -- Create intersections.
+    -- Keep track of which objects were actually used.
+    local objsUsed = {}
+    for ii, o in pairs(g) do
+      objsUsed[ii] = false;
+    end
+    -- Find a starting point, start tracing left and right.
+    -- local left = {
+    --   iter = {
+    --     oi = 1,
+    --     pi = 1
+    --   },
+    --   paths = {},
+    --   dead = false
+    -- }
+    -- table.insert(left.paths, deepcopy(left.iter))
+    -- local right = deepcopy(left)
+    -- -- For each line segment, see if the bounding box overlaps with the other objects in the group.
+    -- while left.dead == false and right.dead == false do
+    --   left.dead = true
+    --   right.dead = true
+    --   -- Try to move the left pointer.
+    --   -- Get adjacent points on the object.
+    --   local adjacent = {}
+    --   if left.iter.pi + 1 <= #v[left.iter.oi].points then
+    --     table.insert(adjacent, {oi = left.iter.oi, pi = left.iter.pi + 1})
+    --   end
+    --   if left.iter.pi - 1 > 0 then
+    --     table.insert(adjacent, {oi = left.iter.oi, pi = left.iter.pi - 1})
+    --   end
+    -- end
+  end
+end
+
 function makeWalls(lines)
   debug('Creating the calculated walls.', 1)
   if lines == nil then
@@ -111,6 +259,7 @@ function makeWalls(lines)
   end
   -- Make line groups based on bbox collision.
   local groups = groupLines(lines)
+  encloseGroups(groups)
   for i, v in pairs(lines) do
     local prevPoint = nil
     local angleMod = 0
@@ -122,11 +271,6 @@ function makeWalls(lines)
         -- It's a circle object
         angleMod = 180
       end
-    elseif #v.points > 2 then
-      --It's a free-form line. Let's simplify and clean up the lines.
-       v.points = cleanLineObj(v.points)
-      --Now let's see if the end points (or close to them) intersect.
-      v.points = cleanEndPoints(v.points)
     end
     for pi, pv in pairs(v.points) do
       if prevPoint == nil then
