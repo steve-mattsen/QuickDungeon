@@ -1,7 +1,8 @@
 function lPoint(point)
   return {
     point = Vector(point),
-    links = {}
+    links = {},
+    data = {}
   }
 end
 
@@ -9,14 +10,10 @@ function linkPoints(point1, point2, data)
   if data == nil then
     data = {}
   end
-  table.insert(point1.links, {
-    point = point2,
-    data = data
-  })
-  table.insert(point2.links, {
-    point = point1,
-    data = data
-  })
+  table.insert(point1.links, point2)
+  table.insert(point2.links, point1)
+  point1.data[point2] = data
+  point2.data[point1] = data
 end
 
 function isLinked(point1, point2)
