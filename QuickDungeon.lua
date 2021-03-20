@@ -22,7 +22,7 @@ function makeWallButtonClick()
   -- Prepare
   prepareLineObjs(lineObjs)
   -- Collect
-  lines = collectLineObjs(lineObjs)
+  lineObjs = collectLineObjs(lineObjs)
   if lineObjs == nil then
     return
   end
@@ -107,10 +107,11 @@ function sanitizeLineObjs(lineObjs)
 end
 
 function linkifyLineObjs(lineObjs)
-  for i,v in lineObjs do
+  debug("Linkifying Line Objects",1)
+  for i,v in pairs(lineObjs) do
     v.lPointStart = lPoint(v.points[1])
     local prev = v.lPointStart
-    for ii, vv in v.points do
+    for ii, vv in pairs(v.points) do
       local next = lPoint(vv)
       linkPoints(prev, next, {
         color = v.color,
@@ -119,7 +120,7 @@ function linkifyLineObjs(lineObjs)
       prev = next
     end
     v.lPointStart = v.lPointStart.links[1]
-    if v.loop = true then
+    if v.loop == true then
       linkPoints(prev, v.lPointStart)
     end
   end
