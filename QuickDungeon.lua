@@ -29,6 +29,7 @@ function makeWallButtonClick()
   -- Sanitize
   sanitizeLineObjs(lineObjs)
   -- Group
+  local groups = groupLineObjs(lineObjs)
   -- Link
   -- Join 
   -- Analyze
@@ -104,14 +105,14 @@ function sanitizeLineObjs(lineObjs)
   end
 end
 
-function groupLines(lines)
+function groupLineObjs(lineObjs)
   debug('Sorting lines into groups', 1)
   local groups = {}
-  while #lines > 0 do
+  while #lineObjs > 0 do
     local group = {}
-    local line = table.remove(lines)
-    table.insert(group, line)
-    groupLinesByBbox(group, lines, line.bbox)
+    local obj = table.remove(lineObjs)
+    table.insert(group, obj)
+    groupLinesByBbox(group, lineObjs, obj.bbox)
     table.insert(groups, group)
   end
   return groups
