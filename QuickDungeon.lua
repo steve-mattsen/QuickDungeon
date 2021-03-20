@@ -28,6 +28,9 @@ function makeWallButtonClick()
   end
   -- Sanitize
   sanitizeLineObjs(lines)
+  -- Group
+  -- Link
+  -- Join 
   -- Analyze
   -- Action
   makeWalls(lines)
