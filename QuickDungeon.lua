@@ -2,6 +2,7 @@
 -- Version 0.1.6
 #include QuickDungeon\debug
 #include QuickDungeon\geometry
+#include QuickDungeon\linkedPoint
 
 vars = {
   createFromAllLines = false,
