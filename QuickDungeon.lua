@@ -28,9 +28,10 @@ function makeWallButtonClick()
   end
   -- Sanitize
   sanitizeLineObjs(lineObjs)
+  -- Link
+  linkifyLineObjs(lineObjs)
   -- Group
   local groups = groupLineObjs(lineObjs)
-  -- Link
   -- Join 
   -- Analyze
   -- Action
@@ -101,6 +102,25 @@ function sanitizeLineObjs(lineObjs)
       v.points = cleanLineObj(v.points)
      --Now let's see if the end points (or close to them) intersect.
       v.points = cleanEndPoints(v.points)
+    end
+  end
+end
+
+function linkifyLineObjs(lineObjs)
+  for i,v in lineObjs do
+    v.lPointStart = lPoint(v.points[1])
+    local prev = v.lPointStart
+    for ii, vv in v.points do
+      local next = lPoint(vv)
+      linkPoints(prev, next, {
+        color = v.color,
+        thickness = v.thickness,
+      })
+      prev = next
+    end
+    v.lPointStart = v.lPointStart.links[1]
+    if v.loop = true then
+      linkPoints(prev, v.lPointStart)
     end
   end
 end
