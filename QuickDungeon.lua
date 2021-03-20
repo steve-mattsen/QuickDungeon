@@ -18,22 +18,22 @@ end
 
 function makeWallButtonClick()
   debug('Create button clicked.', 1)
-  local lines = Global.getVectorLines()
+  local lineObjs = Global.getVectorLines()
   -- Prepare
-  prepareLineObjs(lines)
+  prepareLineObjs(lineObjs)
   -- Collect
-  lines = collectLineObjs(lines)
-  if lines == nil then
+  lines = collectLineObjs(lineObjs)
+  if lineObjs == nil then
     return
   end
   -- Sanitize
-  sanitizeLineObjs(lines)
+  sanitizeLineObjs(lineObjs)
   -- Group
   -- Link
   -- Join 
   -- Analyze
   -- Action
-  makeWalls(lines)
+  makeWalls(lineObjs)
 end
 
 function deleteWallsButtonClick()
