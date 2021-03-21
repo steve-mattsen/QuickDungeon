@@ -109,20 +109,7 @@ end
 function linkifyLineObjs(lineObjs)
   debug("Linkifying Line Objects",1)
   for i,v in pairs(lineObjs) do
-    v.lPointStart = lPoint(v.points[1])
-    local prev = v.lPointStart
-    for ii, vv in pairs(v.points) do
-      local next = lPoint(vv)
-      linkPoints(prev, next, {
-        color = v.color,
-        thickness = v.thickness,
-      })
-      prev = next
-    end
-    v.lPointStart = v.lPointStart.links[1]
-    if v.loop == true then
-      linkPoints(prev, v.lPointStart)
-    end
+    v.linkFirst = linkifyTable(v.points, v.loop)
   end
 end
 
