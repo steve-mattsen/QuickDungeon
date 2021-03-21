@@ -225,7 +225,7 @@ function selectPointsInLineObj(lineObj, bbox, includeConnected)
     prevPoint = v
   end
   return result
-endend
+end
 
 function selectLinksInBbox(first, bbox, includeConnected)
   if includeConnected == nil then
