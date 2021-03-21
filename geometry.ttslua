@@ -225,4 +225,22 @@ function selectPointsInLineObj(lineObj, bbox, includeConnected)
     prevPoint = v
   end
   return result
+endend
+
+function selectLinksInBbox(first, bbox, includeConnected)
+  if includeConnected == nil then
+    includeConnected = false
+  end
+  local result = {}
+  local prev = first
+  local current = first.links[1]
+  for i = 0, 1024, 1 do -- Let's limit the range of this in case we hit an infinite loop.
+    if isInBounds(current.point, bbox) then
+      table.insert(result, current)
+    end
+    if current == first then break end
+    prev = current
+    current = current.links[1]
+  end
+  return result
 end
