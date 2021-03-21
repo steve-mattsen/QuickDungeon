@@ -227,10 +227,7 @@ function selectPointsInLineObj(lineObj, bbox, includeConnected)
   return result
 end
 
-function selectLinksInBbox(first, bbox, includeConnected)
-  if includeConnected == nil then
-    includeConnected = false
-  end
+function selectLinksInBbox(first, bbox)
   local result = {}
   local prev = first
   local current = first.links[1]
