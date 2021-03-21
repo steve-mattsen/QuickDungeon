@@ -143,7 +143,7 @@ function groupLinesByBbox(group, lines, bbox)
 end
 
 function joinGroups(groups)
-  debug("Linking groups together by intersections.", 1ewe)
+  debug("Linking groups together by intersections.", 1)
   for gi,gv in pairs(groups) do
     for li, lv in pairs(gv) do
       -- Go through lineObjects in a group and join their linked point maps by intersections.
