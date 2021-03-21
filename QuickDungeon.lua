@@ -96,6 +96,7 @@ function collectWalls()
 end
 
 function sanitizeLineObjs(lineObjs)
+  debug("Sanitizing line objets", 1)
   for i,v in pairs(lineObjs) do
     if #v.points > 2 and v.loop == false then
      --It's a free-form line. Let's simplify and clean up the lines.
@@ -129,6 +130,7 @@ end
 function groupLinesByBbox(group, lines, bbox)
   -- Recursive function which will populate group with the first line and any lines that overlap its bbox.
   -- Will remove the line from lines if grouped.
+  debug("Group line objects by bbox.", 2)
   for i, v in pairs(lines) do
     --Check if the line overlaps
     if boundsOverlap( bbox, v.bbox ) == true then
@@ -138,6 +140,7 @@ function groupLinesByBbox(group, lines, bbox)
     end
   end
 end
+
 function makeWalls(lines)
   debug('Creating the calculated walls.', 1)
   if lines == nil then
