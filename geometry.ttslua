@@ -241,3 +241,27 @@ function selectLinksInBbox(first, bbox)
   end
   return result
 end
+
+function findLinksIntersections(links1, links2)
+  -- Takes two arrays of link points
+  -- Returns an array of intersections and their related points.
+  local result = {}
+  for i,v in pairs(links1) do
+    for ii,vv in pairs(linsk2) do
+      -- Make a line segment out of each point's forward link.
+      local lines = {
+        {v, v.links[1]},
+        {vv, vv.links[1]}
+      }
+      isect = linesIntersect(lines[1], lines[2])
+      if isect ~= false then
+        table.insert(result, {
+          line1 = lines[1],
+          line2 = lines[2],
+          isect = isect
+        })
+      end
+    end
+  end
+  return result
+end
