@@ -33,6 +33,7 @@ function makeWallButtonClick()
   -- Group
   local groups = groupLineObjs(lineObjs)
   -- Join 
+  local shapes = joinGroups(groups)
   -- Analyze
   -- Action
   makeWalls(lineObjs)
@@ -137,6 +138,26 @@ function groupLinesByBbox(group, lines, bbox)
       table.remove(lines, i);
       table.insert(group, v)
       groupLinesByBbox(group, lines, v.bbox)
+    end
+  end
+end
+
+function joinGroups(groups)
+  debug("Linking groups together by intersections.", 1ewe)
+  for gi,gv in pairs(groups) do
+    for li, lv in pairs(gv) do
+      -- Go through lineObjects in a group and join their linked point maps by intersections.
+      for lli = li + 1, #gv, 1 do
+        local llv = gv[lli]
+        -- Go through each combination of lineObjects that hasn't been checked yet
+        local olap = boundsOverlap(lv.bbox, llv.bbox, true)
+
+        if olap.area > -1 then
+          --Link the objects
+
+        end
+      end
+      --Get overlap bbox of
     end
   end
 end
