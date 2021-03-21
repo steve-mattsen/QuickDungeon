@@ -1,19 +1,19 @@
 function lPoint(point)
   return {
-    point = Vector(point),
+    point = point,
     links = {},
     data = {}
   }
 end
 
 function linkPoints(point1, point2, data)
+  if point1 == nil or point2 == nil then
+    return
+  end
   if data == nil then
     data = {}
   end
   table.insert(point1.links, point2)
-  table.insert(point2.links, point1)
-  point1.data[point2] = data
-  point2.data[point1] = data
 end
 
 function isLinked(point1, point2)
@@ -25,3 +25,40 @@ function isLinked(point1, point2)
   end
   return false
 end
+
+
+function linkifyTable(points, loop)
+  if loop == nil then
+    loop = true
+  end
+  -- Returns first link.
+  local first = nil
+  local last = nil
+  local prev = nil
+  local current = nil
+  for i, v in pairs(points) do
+    current = lPoint(v)
+    current.id = i
+    if first == nil then
+      first = current
+    end
+    linkPoints(prev, current)
+    prev = current
+  end
+  last = current
+  if loop == true then
+    linkPoints(last, first)
+  end
+
+  -- Reverse link list
+  prev = first
+  current = first
+  for i = 1, #points, 1 do
+    current = current.links[1]
+    linkPoints(current, prev)
+    prev = current
+  end
+  linkPoints(first, last)
+  return first
+end
+
