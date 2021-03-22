@@ -228,10 +228,11 @@ function selectPointsInLineObj(lineObj, bbox, includeConnected)
 end
 
 function selectLinksInBbox(first, bbox)
+  -- Takes a start link points. Assumes this is a loop for now.
   local result = {}
   local prev = first
-  for i = 0, 1024, 1 do -- Let's limit the range of this in case we hit an infinite loop.
   local current = first.links[2]
+  for i = 0, 1024, 1 do -- Let's limit the range of this just in case we hit an infinite loop.
     if isInBounds(current.point, bbox) then
       table.insert(result, current)
     end
@@ -243,6 +244,7 @@ function selectLinksInBbox(first, bbox)
 end
 
 function findLinksIntersections(links1, links2)
+  debug("Finding intersections between link groups.", 2)
   -- Takes two arrays of link points
   -- Returns an array of intersections and their related points.
   local result = {}
