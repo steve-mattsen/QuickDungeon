@@ -230,14 +230,14 @@ end
 function selectLinksInBbox(first, bbox)
   local result = {}
   local prev = first
-  local current = first.links[1]
   for i = 0, 1024, 1 do -- Let's limit the range of this in case we hit an infinite loop.
+  local current = first.links[2]
     if isInBounds(current.point, bbox) then
       table.insert(result, current)
     end
     if current == first then break end
     prev = current
-    current = current.links[1]
+    current = current.links[2]
   end
   return result
 end
@@ -246,14 +246,45 @@ function findLinksIntersections(links1, links2)
   -- Takes two arrays of link points
   -- Returns an array of intersections and their related points.
   local result = {}
+  local links1First = true
   for i,v in pairs(links1) do
-    for ii,vv in pairs(linsk2) do
+    local links2First = true
+    for ii,vv in pairs(links2) do
+      if links1First == true or links2First == true then
+        -- Check the first link of links1 and/or links2 backwards.
+        local lines = {}
+        if links1First == true then
+          table.insert(lines, { v, v.links[1] })
+        else
+          table.insert(lines, { v, v.links[2] })
+        end
+        if links2First == true then
+          table.insert(lines, { vv, vv.links[1] })
+        else
+          table.insert(lines, { vv, vv.links[2] })
+        end
+        local isect = linesIntersect(
+          {lines[1][1].point, lines[1][2].point},
+          {lines[2][1].point, lines[2][2].point}
+        )
+        if isect ~= false then
+          table.insert(result, {
+            line1 = lines[1],
+            line2 = lines[2],
+            isect = isect
+          })
+        else
+        end
+      end
       -- Make a line segment out of each point's forward link.
       local lines = {
-        {v, v.links[1]},
-        {vv, vv.links[1]}
+        {v, v.links[2]},
+        {vv, vv.links[2]}
       }
-      isect = linesIntersect(lines[1], lines[2])
+      local isect = linesIntersect(
+        {lines[1][1].point, lines[1][2].point},
+        {lines[2][1].point, lines[2][2].point}
+      )
       if isect ~= false then
         table.insert(result, {
           line1 = lines[1],
@@ -261,7 +292,9 @@ function findLinksIntersections(links1, links2)
           isect = isect
         })
       end
+      links2First = false
     end
+    links1First = false
   end
   return result
 end
