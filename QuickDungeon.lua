@@ -33,7 +33,7 @@ function makeWallButtonClick()
   -- Group
   local groups = groupLineObjs(lineObjs)
   -- Join 
-  local shapes = joinGroups(groups)
+  local allMaps = joinGroups(groups)
   -- Analyze
   -- Action
   makeWalls(lineObjs)
@@ -144,7 +144,9 @@ end
 
 function joinGroups(groups)
   debug("Linking groups together by intersections.", 1)
+  local allMaps = {}
   for gi,gv in pairs(groups) do
+    local groupIsects = {}
     for li, lv in pairs(gv) do
       -- Go through lineObjects in a group and join their linked point maps by intersections.
       for lli = li + 1, #gv, 1 do
@@ -153,13 +155,26 @@ function joinGroups(groups)
         local olap = boundsOverlap(lv.bbox, llv.bbox, true)
 
         if olap.area > -1 then
-          --Link the objects
-
+          allMaps[gi] = lv.linkFirst
+          -- Link the objects
+          local links1 = selectLinksInBbox(lv.linkFirst, olap.bbox)
+          local links2 = selectLinksInBbox(llv.linkFirst, olap.bbox)
+          -- Find
+          local isects = findLinksIntersections(links1, links2)
+          debug("Found " .. #isects .. " intersections between lineObj " .. li .. " and " .. lli, 2)
+          for i,v in pairs(isects) do
+            table.insert(groupIsects, v)
+          end
         end
       end
-      --Get overlap bbox of
+    end
+    debug("Found " .. #groupIsects .. " intersections in group " .. gi)
+    -- Now we got all the intersections in the group. Let's join them.
+    for i,v in pairs(groupIsects) do
+      intersectLinks(v.link1, v.link2, v.isect)
     end
   end
+  return allMaps
 end
 
 function makeWalls(lines)
