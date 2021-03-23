@@ -300,3 +300,8 @@ function findLinksIntersections(links1, links2)
   end
   return result
 end
+
+function realAngle(p1, p2)
+  -- TTS Vectors can't get me real angles, only <= 180 deg
+  return math.deg(math.atan2(p1.z - p2.z, p1.x-p2.x) )
+end
