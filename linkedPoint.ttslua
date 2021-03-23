@@ -86,6 +86,7 @@ function linkifyTable(points, loop)
 end
 
 function intersectLinks(link1, link2, isect)
+  debug("Intersect links", 2)
   -- Takes two tables of two lPoints each and and intersection point.
   if link1 == nil or link2 == nil then
     return
@@ -94,7 +95,9 @@ function intersectLinks(link1, link2, isect)
     -- Figure out the intersection point. Write later.
     return
   end
-  isect = lPoint(Vector(isect))
+  local isect = lPoint(Vector(isect))
+  isect.id = 0
   injectLink(link1[1], link1[2], isect)
   injectLink(link2[1], link2[2], isect)
+  return isect
 end

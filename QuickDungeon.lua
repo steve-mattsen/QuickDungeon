@@ -171,7 +171,7 @@ function joinGroups(groups)
     debug("Found " .. #groupIsects .. " intersections in group " .. gi)
     -- Now we got all the intersections in the group. Let's join them.
     for i,v in pairs(groupIsects) do
-      intersectLinks(v.link1, v.link2, v.isect)
+      intersectLinks(v.line1, v.line2, v.isect)
     end
   end
   return allMaps
