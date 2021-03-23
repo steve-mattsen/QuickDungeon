@@ -305,3 +305,18 @@ function realAngle(p1, p2)
   -- TTS Vectors can't get me real angles, only <= 180 deg
   return math.deg(math.atan2(p1.z - p2.z, p1.x-p2.x) )
 end
+
+function angleDiff(p1, p2, p3)
+  -- Take three points / vectors. Provides a positive or negative angle of p2-> p3 compared to p1 -> p2
+  local angle1 = realAngle(p1, p2)
+  local angle2 = realAngle(p2, p3)
+  print(angle1)
+  print(angle2)
+  local diff = angle1 - angle2
+  if diff < -180 then
+    return 360 + diff
+  elseif diff > 180 then
+    return 360 - diff
+  end
+  return diff
+end
