@@ -267,6 +267,12 @@ function callbackSinglePlane(box, p1, p2)
   end
   setSuperLock(box, true)
   box.setScale({0.1, 0.2, p1:distance(p2) * (1/14)}) -- 1 / 14, width of walls.
+  p1.y = 0
+  p2.y = 0
+  local angle = p1:angle(p2)
+  angle = math.atan2(p1.x - p2.x, p1.z - p2.z)
+  angle = math.deg(angle)
+  box.setRotation({0, angle, 0})
   setSuperLock(box, true)
 end
 
