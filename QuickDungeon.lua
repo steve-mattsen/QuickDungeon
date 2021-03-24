@@ -186,8 +186,8 @@ function makeShapes(maps)
     local leftPath = walkDirection(mv.links[1], mv, mv.links[2])
     -- local rightPath = walkDirection(mv.links[1], true, mv, mv.links[2])
     local flat = flattenTable(leftPath)
-    table.insert(flat, mv)
     table.insert(flat, mv.links[1])
+    table.insert(flat, mv)
     table.insert(shapes, flat)
   end
   return shapes
