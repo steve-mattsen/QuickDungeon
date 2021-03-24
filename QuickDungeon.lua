@@ -123,24 +123,32 @@ function groupLineObjs(lineObjs)
     local group = {}
     local obj = table.remove(lineObjs)
     table.insert(group, obj)
-    groupLinesByBbox(group, lineObjs, obj.bbox)
+    local olapObj = nil
+    repeat
+      olapObj = groupLinesByBbox(group, lineObjs, obj.bbox)
+      if olapObj ~= false then
+        table.insert(group, olapObj)
+      end
+    until(olapObj == false)
     table.insert(groups, group)
   end
   return groups
 end
 
-function groupLinesByBbox(group, lines, bbox)
-  -- Recursive function which will populate group with the first line and any lines that overlap its bbox.
-  -- Will remove the line from lines if grouped.
+function groupLinesByBbox(group, lineObjs, bbox)
+  -- Returns the first lineObj to overlap with anything in the group. Removes the line.
+  -- Otherwise returns false.
+  -- Will likely have to rewrite sometime soon, as I can see this getting really slow with complex drawings.
   debug("Group line objects by bbox.", 2)
-  for i, v in pairs(lines) do
-    --Check if the line overlaps
-    if boundsOverlap( bbox, v.bbox ) == true then
-      table.remove(lines, i);
-      table.insert(group, v)
-      groupLinesByBbox(group, lines, v.bbox)
+  for i, v in pairs(lineObjs) do
+    for gi, gv in pairs(group) do
+      --Check if the line overlaps anything in the group.
+      if boundsOverlap( bbox, gv.bbox) == true then
+        return table.remove(lineObjs, i)
+      end
     end
   end
+  return false
 end
 
 function joinGroups(groups)
