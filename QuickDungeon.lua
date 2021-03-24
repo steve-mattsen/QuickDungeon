@@ -35,8 +35,9 @@ function makeWallButtonClick()
   -- Join 
   local allMaps = joinGroups(groups)
   -- Analyze
+  local shapes = makeShapes(allMaps)
   -- Action
-  makeWalls(lineObjs)
+  makeWalls(shapes)
 end
 
 function deleteWallsButtonClick()
@@ -178,55 +179,34 @@ function joinGroups(groups)
 end
 
 function makeWalls(lines)
+function makeShapes(maps)
+  debug("Making shapes out of point maps.", 1)
+  local shapes = {}
+  for mi, mv in pairs(maps) do
+    -- debug(dumpLink(mv))
+    local leftPath = walkDirection(mv.links[1], mv, mv.links[2])
+    -- local rightPath = walkDirection(mv.links[1], true, mv, mv.links[2])
+    local flat = flattenTable(leftPath)
+    table.insert(flat, mv)
+    table.insert(flat, mv.links[1])
+    table.insert(shapes, flat)
+  end
+  return shapes
+end
+
+function makeWalls(shapes)
   debug('Creating the calculated walls.', 1)
-  if lines == nil then
+  if shapes == nil then
      return nil
   end
   -- Make line groups based on bbox collision.
-  local groups = groupLines(lines)
-  for i, v in pairs(lines) do
-    local prevPoint = nil
-    local angleMod = 0
-    if v.loop == true then
-      if (#v.points == 4) then
-        -- It's a rectangle object
-        angleMod = 0
+  for si, sv in pairs(shapes) do
+    for i,v in pairs(sv) do
+      if i == 1 then
+        createWall(sv[#sv].point, v.point )
       else
-        -- It's a circle object
-        angleMod = 180
+        createWall(sv[i-1].point, v.point)
       end
-    end
-    for pi, pv in pairs(v.points) do
-      if prevPoint == nil then
-        prevPoint = pv
-      else
-        angle = math.atan2(prevPoint.x - pv.x, prevPoint.z - pv.z)
-        angle = math.deg(angle)
-        wall = createWall(prevPoint, pv, v.color)
-        wall.setRotation({0, (angle + angleMod), 0})
-        prevPoint = pv
-      end
-    end
-
-    -- Figure out what to do about the end points.
-    local endWall = nil
-    if v.loop == true then
-      -- We know the end points should be connected. Carry on.
-      endWall = createWall(prevPoint, v.points[1], v.color)
-    elseif #v.points > 2 then
-      -- It's a free-form line. They might need connecting.
-      debug('Determining if first and last points should be connected.', 2)
-      -- Connect the first and last points if they're close enough.
-      diffX = math.abs(prevPoint.x - v.points[1].x)
-      diffY = math.abs(prevPoint.z - v.points[1].z)
-      if diffX < 0.2 and diffY < 0.2 then
-        endWall = createWall(prevPoint, v.points[1], v.color)
-      end
-    end
-    if endWall != nil then
-      angle = math.atan2(prevPoint.x - v.points[1].x, prevPoint.z - v.points[1].z)
-      angle = math.deg(angle)
-      endWall.setRotation({0, (angle + angleMod), 0})
     end
   end
 end
