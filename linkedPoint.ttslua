@@ -115,3 +115,50 @@ function intersectLinks(link1, link2, isect)
   injectLink(link2[1], link2[2], isect)
   return isect
 end
+
+function walkDirection(start, prev, current)
+  debug("Walking point " .. dumpLink(current), 2)
+  if current == start then
+    -- We completed the loop.
+    return current
+  elseif #current.links == 1 then
+    -- Dead end
+    return false
+  elseif #current.links == 2 then
+    -- Only one way to go.
+    local next = current.links[1]
+    if next == prev then
+      next = current.links[2]
+    end
+    return {current, walkDirection(start, current, next)}
+  end
+  -- We're at an intersection. Decide where to go.
+  local linkAngles = {}
+  for i,v in pairs(current.links) do
+    if v ~= prev then
+      table.insert(linkAngles, {
+        link = v,
+        angle = angleDiff(prev.point, current.point, v.point)
+      })
+    end
+  end
+
+  table.sort(linkAngles, function(a,b) return a.angle > b.angle end)
+
+  for i,v in pairs(linkAngles) do
+    local pathFound = walkDirection(start, current, v.link)
+    if pathFound ~= false then
+      return { current, pathFound }
+    end
+  end
+end
+
+function flattenTable(target)
+  local result = {}
+  while #target == 2 do
+    table.insert(result, target[1])
+    target = target[2]
+  end
+  table.insert(result, target[1])
+  return result
+end
