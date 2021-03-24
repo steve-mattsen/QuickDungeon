@@ -68,7 +68,9 @@ function linkifyTable(points, loop)
   if loop == nil then
     loop = true
   end
-  -- Returns first link.
+  -- Returns left-most link.
+
+  local leftMost = nil
   local first = nil
   local last = nil
   local prev = nil
@@ -78,6 +80,11 @@ function linkifyTable(points, loop)
     current.id = i
     if first == nil then
       first = current
+    end
+    if leftMost == nil then
+      leftMost = current
+    elseif current.point.x < leftMost.point.x then
+      leftMost = current
     end
     linkPoints(prev, current)
     prev = current
@@ -95,8 +102,9 @@ function linkifyTable(points, loop)
     linkPoints(current, prev)
     prev = current
   end
-  linkPoints(first, last)
-  return first
+  -- linkPoints(first, last)
+  return leftMost
+end
 end
 
 function intersectLinks(link1, link2, isect)
@@ -117,21 +125,29 @@ function intersectLinks(link1, link2, isect)
 end
 
 function walkDirection(start, prev, current)
-  debug("Walking point " .. dumpLink(current), 2)
-  if current == start then
-    -- We completed the loop.
-    return current
-  elseif #current.links == 1 then
-    -- Dead end
-    return false
-  elseif #current.links == 2 then
-    -- Only one way to go.
-    local next = current.links[1]
-    if next == prev then
-      next = current.links[2]
-    end
-    return {current, walkDirection(start, current, next)}
+  if current == nil then
+    current = start
   end
+  debug("Walking point " .. dumpLink(current), 2)
+  if (prev.point.x < start.point.x) then
+    debug('First run of walkDirection')
+  else
+    if current == start then
+      -- We completed the loop.
+      return current
+    elseif #current.links == 1 then
+      -- Dead end
+      return false
+    elseif #current.links == 2 then
+      -- Only one way to go.
+      local next = current.links[1]
+      if next == prev then
+        next = current.links[2]
+      end
+      return {current, walkDirection(start, current, next)}
+    end
+  end
+
   -- We're at an intersection. Decide where to go.
   local linkAngles = {}
   for i,v in pairs(current.links) do

@@ -157,14 +157,20 @@ function joinGroups(groups)
   for gi,gv in pairs(groups) do
     local groupIsects = {}
     for li, lv in pairs(gv) do
+      if allMaps[gi] == nil then
+        allMaps[gi] = lv.linkFirst
+      elseif lv.linkFirst.point.x < allMaps[gi].point.x then
+        -- Make sure we always start at the left-most point.
+        allMaps[gi] = lv.linkFirst
+      end
       -- Go through lineObjects in a group and join their linked point maps by intersections.
       for lli = li + 1, #gv, 1 do
         local llv = gv[lli]
+
         -- Go through each combination of lineObjects that hasn't been checked yet
         local olap = boundsOverlap(lv.bbox, llv.bbox, true)
 
         if olap.area > -1 then
-          allMaps[gi] = lv.linkFirst
           -- Link the objects
           local links1 = selectLinksInBbox(lv.linkFirst, olap.bbox)
           local links2 = selectLinksInBbox(llv.linkFirst, olap.bbox)
@@ -191,10 +197,13 @@ function makeShapes(maps)
   local shapes = {}
   for mi, mv in pairs(maps) do
     -- debug(dumpLink(mv))
-    local leftPath = walkDirection(mv.links[1], mv, mv.links[2])
+    local fakeStart = Vector(mv.point)
+    fakeStart.x = fakeStart.x - 1
+    fakeStart = lPoint(fakeStart)
+    pingPoint(fakeStart.point)
+    local leftPath = walkDirection(mv, fakeStart)
     -- local rightPath = walkDirection(mv.links[1], true, mv, mv.links[2])
     local flat = flattenTable(leftPath)
-    table.insert(flat, mv.links[1])
     table.insert(flat, mv)
     table.insert(shapes, flat)
   end
