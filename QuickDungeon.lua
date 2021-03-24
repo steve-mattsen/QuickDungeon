@@ -178,7 +178,6 @@ function joinGroups(groups)
   return allMaps
 end
 
-function makeWalls(lines)
 function makeShapes(maps)
   debug("Making shapes out of point maps.", 1)
   local shapes = {}
