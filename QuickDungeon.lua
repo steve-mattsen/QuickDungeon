@@ -2,6 +2,7 @@
 -- Version 0.1.6
 #include QuickDungeon\debug
 #include QuickDungeon\geometry
+#include QuickDungeon\linkedPoint
 
 vars = {
   createFromAllLines = false,
@@ -16,34 +17,51 @@ function onLoad(save_state)
 end
 
 function makeWallButtonClick()
-  debug('Starting the make wall process', 1)
-  lines = Global.getVectorLines()
-  makeBoundingBoxes(lines)
-  lines = collectLines(lines)
-  makeWalls(lines)
+  debug('Create button clicked.', 1)
+  local lineObjs = Global.getVectorLines()
+  -- Prepare
+  prepareLineObjs(lineObjs)
+  -- Collect
+  lineObjs = collectLineObjs(lineObjs)
+  if lineObjs == nil then
+    return
+  end
+  -- Sanitize
+  sanitizeLineObjs(lineObjs)
+  -- Link
+  linkifyLineObjs(lineObjs)
+  -- Group
+  local groups = groupLineObjs(lineObjs)
+  -- Join 
+  local allMaps = joinGroups(groups)
+  -- Analyze
+  local shapes = makeShapes(allMaps)
+  -- Action
+  makeWalls(shapes)
 end
 
 function deleteWallsButtonClick()
   deleteWalls(collectWalls())
 end
 
-function makeBoundingBoxes(lineObjs)
-  debug('Making bounding boxes for drawn objects', 1)
+function prepareLineObjs(lineObjs)
+  debug('Making bounding boxes for line objects', 1)
   if lineObjs == nil then
     return nil
   end
   for i, v in pairs(lineObjs) do
-    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 3)
+    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 2)
+    v.id = i
     v.bbox = bboxLineObj(v)
   end
 end
 
-function collectLines( allLines )
+function collectLineObjs( allLines )
   if vars['affectGlobal'] == true then
-    debug('Collecting all lines in Global.', 1)
+    debug('Collecting all line objects in Global.', 1)
     return allLines;
   end
-  debug('Filtering out unneessary lines.', 1)
+  debug('Filtering out all line objects not under plate.', 1)
 
   local bbox = bboxObj(self)
   local result = {}
@@ -79,14 +97,33 @@ function collectWalls()
   return result
 end
 
-function groupLines(lines)
+function sanitizeLineObjs(lineObjs)
+  debug("Sanitizing line objets", 1)
+  for i,v in pairs(lineObjs) do
+    if #v.points > 2 and v.loop == false then
+     --It's a free-form line. Let's simplify and clean up the lines.
+      v.points = cleanLineObj(v.points)
+     --Now let's see if the end points (or close to them) intersect.
+      v.points = cleanEndPoints(v.points)
+    end
+  end
+end
+
+function linkifyLineObjs(lineObjs)
+  debug("Linkifying Line Objects",1)
+  for i,v in pairs(lineObjs) do
+    v.linkFirst = linkifyTable(v.points, v.loop)
+  end
+end
+
+function groupLineObjs(lineObjs)
   debug('Sorting lines into groups', 1)
   local groups = {}
-  while #lines > 0 do
+  while #lineObjs > 0 do
     local group = {}
-    local line = table.remove(lines)
-    table.insert(group, line)
-    groupLinesByBbox(group, lines, line.bbox)
+    local obj = table.remove(lineObjs)
+    table.insert(group, obj)
+    groupLinesByBbox(group, lineObjs, obj.bbox)
     table.insert(groups, group)
   end
   return groups
@@ -95,6 +132,7 @@ end
 function groupLinesByBbox(group, lines, bbox)
   -- Recursive function which will populate group with the first line and any lines that overlap its bbox.
   -- Will remove the line from lines if grouped.
+  debug("Group line objects by bbox.", 2)
   for i, v in pairs(lines) do
     --Check if the line overlaps
     if boundsOverlap( bbox, v.bbox ) == true then
@@ -104,61 +142,70 @@ function groupLinesByBbox(group, lines, bbox)
     end
   end
 end
-function makeWalls(lines)
+
+function joinGroups(groups)
+  debug("Linking groups together by intersections.", 1)
+  local allMaps = {}
+  for gi,gv in pairs(groups) do
+    local groupIsects = {}
+    for li, lv in pairs(gv) do
+      -- Go through lineObjects in a group and join their linked point maps by intersections.
+      for lli = li + 1, #gv, 1 do
+        local llv = gv[lli]
+        -- Go through each combination of lineObjects that hasn't been checked yet
+        local olap = boundsOverlap(lv.bbox, llv.bbox, true)
+
+        if olap.area > -1 then
+          allMaps[gi] = lv.linkFirst
+          -- Link the objects
+          local links1 = selectLinksInBbox(lv.linkFirst, olap.bbox)
+          local links2 = selectLinksInBbox(llv.linkFirst, olap.bbox)
+          -- Find
+          local isects = findLinksIntersections(links1, links2)
+          debug("Found " .. #isects .. " intersections between lineObj " .. li .. " and " .. lli, 2)
+          for i,v in pairs(isects) do
+            table.insert(groupIsects, v)
+          end
+        end
+      end
+    end
+    debug("Found " .. #groupIsects .. " intersections in group " .. gi)
+    -- Now we got all the intersections in the group. Let's join them.
+    for i,v in pairs(groupIsects) do
+      intersectLinks(v.line1, v.line2, v.isect)
+    end
+  end
+  return allMaps
+end
+
+function makeShapes(maps)
+  debug("Making shapes out of point maps.", 1)
+  local shapes = {}
+  for mi, mv in pairs(maps) do
+    -- debug(dumpLink(mv))
+    local leftPath = walkDirection(mv.links[1], mv, mv.links[2])
+    -- local rightPath = walkDirection(mv.links[1], true, mv, mv.links[2])
+    local flat = flattenTable(leftPath)
+    table.insert(flat, mv)
+    table.insert(flat, mv.links[1])
+    table.insert(shapes, flat)
+  end
+  return shapes
+end
+
+function makeWalls(shapes)
   debug('Creating the calculated walls.', 1)
-  if lines == nil then
+  if shapes == nil then
      return nil
   end
   -- Make line groups based on bbox collision.
-  local groups = groupLines(lines)
-  for i, v in pairs(lines) do
-    local prevPoint = nil
-    local angleMod = 0
-    if v.loop == true then
-      if (#v.points == 4) then
-        -- It's a rectangle object
-        angleMod = 0
+  for si, sv in pairs(shapes) do
+    for i,v in pairs(sv) do
+      if i == 1 then
+        createWall(sv[#sv].point, v.point )
       else
-        -- It's a circle object
-        angleMod = 180
+        createWall(sv[i-1].point, v.point)
       end
-    elseif #v.points > 2 then
-      --It's a free-form line. Let's simplify and clean up the lines.
-       v.points = cleanLineObj(v.points)
-      --Now let's see if the end points (or close to them) intersect.
-      v.points = cleanEndPoints(v.points)
-    end
-    for pi, pv in pairs(v.points) do
-      if prevPoint == nil then
-        prevPoint = pv
-      else
-        angle = math.atan2(prevPoint.x - pv.x, prevPoint.z - pv.z)
-        angle = math.deg(angle)
-        wall = createWall(prevPoint, pv, v.color)
-        wall.setRotation({0, (angle + angleMod), 0})
-        prevPoint = pv
-      end
-    end
-
-    -- Figure out what to do about the end points.
-    local endWall = nil
-    if v.loop == true then
-      -- We know the end points should be connected. Carry on.
-      endWall = createWall(prevPoint, v.points[1], v.color)
-    elseif #v.points > 2 then
-      -- It's a free-form line. They might need connecting.
-      debug('Determining if first and last points should be connected.', 2)
-      -- Connect the first and last points if they're close enough.
-      diffX = math.abs(prevPoint.x - v.points[1].x)
-      diffY = math.abs(prevPoint.z - v.points[1].z)
-      if diffX < 0.2 and diffY < 0.2 then
-        endWall = createWall(prevPoint, v.points[1], v.color)
-      end
-    end
-    if endWall != nil then
-      angle = math.atan2(prevPoint.x - v.points[1].x, prevPoint.z - v.points[1].z)
-      angle = math.deg(angle)
-      endWall.setRotation({0, (angle + angleMod), 0})
     end
   end
 end
@@ -219,6 +266,12 @@ function callbackSinglePlane(box, p1, p2)
   end
   setSuperLock(box, true)
   box.setScale({0.1, 0.2, p1:distance(p2) * (1/14)}) -- 1 / 14, width of walls.
+  p1.y = 0
+  p2.y = 0
+  local angle = p1:angle(p2)
+  angle = math.atan2(p1.x - p2.x, p1.z - p2.z)
+  angle = math.deg(angle)
+  box.setRotation({0, angle, 0})
   setSuperLock(box, true)
 end
 

@@ -47,22 +47,35 @@ function bboxFromPoints(points)
   return bbox
 end
 
-function isInBounds(point, bounds)
-  -- Bounds is a two-point table. Top right and bottom left in that order
-  if point.x > bounds[1].x then
+function isInBounds(point, bounds, boundsOffset)
+  if boundsOffset == nil then
+    boundsOffset = 0
+  end
+  -- Bounds is a two-point table. Bottom left and top right in that order
+  if point.x < bounds[1].x then
     return false
-  elseif point.x < bounds[2].x then
+  elseif point.x > bounds[2].x then
     return false
-  elseif point.z > bounds[1].z then
+  elseif point.z < bounds[1].z then
     return false
-  elseif point.z < bounds[2].z then
+  elseif point.z > bounds[2].z then
     return false
   end
   return true
 end
 
-function boundsOverlap(bbox1, bbox2)
+function boundsOverlap(bbox1, bbox2, fullCalc)
+  -- Checks whether the bounding boxes overlap.
+  -- If they do, returns a bounding box describing their overlap area.
   -- Assumes bbox1 and 2 are two points in {lowerLeft, upperRight} format.
+  -- fullCalc is a bool.
+  -- If true, will calculate and return the bounding box (even if negative.)
+  -- Will also return the length, height and area of the resulting bbox.
+  -- Otherwise, will cheaply just return true / false without calculating.
+  if fullCalc == nil then
+    fullCalc = false
+  end
+  if fullCalc == false then
   if bbox1[1].z > bbox2[2].z then
     -- bbox1 is above bbox2
     return false
@@ -77,6 +90,37 @@ function boundsOverlap(bbox1, bbox2)
     return false
   end
   return true
+end
+  --We're fully calculating.
+  local oBox = {
+    Vector(bbox1[1].x, 0, bbox1[1].z),
+    Vector(bbox1[2].x, 0, bbox1[2].z)
+  }
+  -- Let's find the highest low points.
+  if bbox2[1].x > bbox1[1].x then
+    oBox[1].x = bbox2[1].x
+  end
+  if bbox2[1].z > bbox1[1].z then
+    oBox[1].z = bbox2[1].z
+  end
+  -- Now the lowest high points.
+  if bbox2[2].x < bbox1[2].x then
+    oBox[2].x = bbox2[2].x
+  end
+  if bbox2[2].z < bbox1[2].z then
+    oBox[2].z = bbox2[2].z
+  end
+  -- We now have an overlap box.
+  local o = {
+    bbox = oBox,
+    length = oBox[2].x - oBox[1].x,
+    height = oBox[2].z - oBox[1].z,
+  }
+  o.area = o.length * o.height
+  if o.length < 0 and o.height < 0 then
+    o.area = o.area * -1
+  end
+  return o
 end
 
 function linesIntersect(line1, line2)
@@ -94,9 +138,181 @@ function linesIntersect(line1, line2)
   if t < 0 or t > 1 or u < 0 or u > 1 then
     return false
   end
-  return {
-    x = line1[1].x + (t * (line1[2].x - line1[1].x)),
-    y = 0,
-    z = line1[1].z + (t * (line1[2].z - line1[1].z))
+  return Vector(
+    line1[1].x + (t * (line1[2].x - line1[1].x)),
+    0,
+    line1[1].z + (t * (line1[2].z - line1[1].z))
+  )
+end
+
+function makeBboxLineObj(bbox)
+  local nl = {
+    points = {},
+    loop = true,
+    color = {1, 0.2, 0.2},
+    thickness = 0.05
   }
+  table.insert(nl.points, Vector(bbox[1].x, 1, bbox[1].z))
+  table.insert(nl.points, Vector(bbox[1].x, 1, bbox[2].z))
+  table.insert(nl.points, Vector(bbox[2].x, 1, bbox[2].z))
+  table.insert(nl.points, Vector(bbox[2].x, 1, bbox[1].z))
+  return nl
+end
+
+function lineObjIntersectionsInBbox(lineObj1, lineObj2, bbox)
+  points1 = selectPointsInLineObj(v, olap.bbox, true)
+  points2 = selectPointsInLineObj(caller, olap.bbox, true)
+  debug('points1: ' .. dump(points1))
+  debug('points2: ' .. dump(points2))
+  local prevPoint1 = nil
+  local prevPoint2 = nil
+  local intersections = {}
+  local isect = false
+  for pi1, pv1 in pairs(points1) do
+    if pi1 == 1 then goto continue1 end
+
+    prevPoint2 = nil
+    for pi2, pv2 in pairs(points2) do
+      if pi2 == 1 then goto continue2 end
+
+      --Check intersections with all lines
+      isect = linesIntersect(
+        {prevPoint1, pv1},
+        {prevPoint2, pv2}
+      )
+      if isect ~= false then
+        isect.line1 = { prevPoint1, pv1 }
+        isect.line2 = { prevPoint2, pv2 }
+        table.insert(intersections, isect)
+        pingPoint(isect)
+      end
+
+      ::continue2::
+      prevPoint2 = pv2
+    end
+
+    ::continue1::
+    prevPoint1 = pv1
+  end
+  return intersections
+end
+
+function selectPointsInLineObj(lineObj, bbox, includeConnected)
+  if includeConnected == nil then
+    includeConnected = false
+  end
+  local result = {}
+  local prevPoint = lineObj.points[#lineObj.points]
+  local prevPointWasInBounds = isInBounds(lineObj.points[#lineObj.points], bbox)
+  for i,v in pairs(lineObj.points) do
+    if isInBounds(v, bbox) == true then
+      -- debug("Point is in bounds.")
+      if prevPointWasInBounds == false and includeConnected then
+        table.insert(result, prevPoint)
+      end
+      table.insert(result, v)
+      prevPointWasInBounds = true
+    else
+      -- debug("Point is not in bounds.")
+      if prevPointWasInBounds == true and i ~= #lineObj.points then
+        -- Look ahead to see if the next one will be in bounds and don't add twice.
+        if isInBounds(lineObj.points[i+1], bbox) == false then
+          table.insert(result, v)
+        end
+      end
+      prevPointWasInBounds = false
+    end
+    prevPoint = v
+  end
+  return result
+end
+
+function selectLinksInBbox(first, bbox)
+  -- Takes a start link points. Assumes this is a loop for now.
+  local result = {}
+  local prev = first
+  local current = first.links[2]
+  for i = 0, 1024, 1 do -- Let's limit the range of this just in case we hit an infinite loop.
+    if isInBounds(current.point, bbox) then
+      table.insert(result, current)
+    end
+    if current == first then break end
+    prev = current
+    current = current.links[2]
+  end
+  return result
+end
+
+function findLinksIntersections(links1, links2)
+  debug("Finding intersections between link groups.", 2)
+  -- Takes two arrays of link points
+  -- Returns an array of intersections and their related points.
+  local result = {}
+  local links1First = true
+  for i,v in pairs(links1) do
+    local links2First = true
+    for ii,vv in pairs(links2) do
+      if links1First == true or links2First == true then
+        -- Check the first link of links1 and/or links2 backwards.
+        local lines = {}
+        if links1First == true then
+          table.insert(lines, { v, v.links[1] })
+        else
+          table.insert(lines, { v, v.links[2] })
+        end
+        if links2First == true then
+          table.insert(lines, { vv, vv.links[1] })
+        else
+          table.insert(lines, { vv, vv.links[2] })
+        end
+        local isect = linesIntersect(
+          {lines[1][1].point, lines[1][2].point},
+          {lines[2][1].point, lines[2][2].point}
+        )
+        if isect ~= false then
+          table.insert(result, {
+            line1 = lines[1],
+            line2 = lines[2],
+            isect = isect
+          })
+        else
+        end
+      end
+      -- Make a line segment out of each point's forward link.
+      local lines = {
+        {v, v.links[2]},
+        {vv, vv.links[2]}
+      }
+      local isect = linesIntersect(
+        {lines[1][1].point, lines[1][2].point},
+        {lines[2][1].point, lines[2][2].point}
+      )
+      if isect ~= false then
+        table.insert(result, {
+          line1 = lines[1],
+          line2 = lines[2],
+          isect = isect
+        })
+      end
+      links2First = false
+    end
+    links1First = false
+  end
+  return result
+end
+
+function realAngle(p1, p2)
+  -- TTS Vectors can't get me real angles, only <= 180 deg
+  return math.deg(math.atan2(p2.z - p1.z, p2.x-p1.x) )
+end
+
+function angleDiff(p1, p2, p3)
+  -- Take three points / vectors. Provides a positive or negative angle of p2-> p3 compared to p1 -> p2
+  local angle1 = realAngle(p1, p2)
+  local angle2 = realAngle(p2, p3)
+  local diff = (angle2 - angle1) % 360
+  if diff > 180 then
+    return diff - 360
+  end
+  return diff
 end

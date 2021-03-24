@@ -1,0 +1,164 @@
+function lPoint(point)
+  return {
+    point = point,
+    links = {},
+    data = {}
+  }
+end
+
+function linkPoints(point1, point2, data)
+  if point1 == nil or point2 == nil then
+    return
+  end
+  if data == nil then
+    data = {}
+  end
+  table.insert(point1.links, point2)
+end
+
+function isLinked(point1, point2)
+  -- Checks point2 to see if it has point1 in it.
+  for i, v in point2.links do
+    if v.point == point1 then
+      return true
+    end
+  end
+  return false
+end
+
+function unlink(point1, point2)
+  --Removes point1 from point2 and vice versa.
+  for i,v in pairs(point1.links) do
+    if v == point2 then
+      table.remove(point1.links, i)
+    end
+  end
+  for i,v in pairs(point2.links) do
+    if v == point1 then
+      table.remove(point2.links, i)
+    end
+  end
+end
+
+function injectLink(point1, point2, inject)
+  local p1Iter = 0
+  local p2Iter = 0
+  for i,v in pairs(point1.links) do
+    if (v == point2) then
+      p1Iter = i
+      break
+    end
+  end
+  for i,v in pairs(point2.links) do
+    if (v == point1) then
+      p2Iter = i
+      break
+    end
+  end
+
+  table.remove(point1.links, p1Iter)
+  table.remove(point2.links, p2Iter)
+  table.insert(point1.links, p1Iter, inject)
+  table.insert(point2.links, p2Iter, inject)
+  table.insert(inject.links, point1)
+  table.insert(inject.links, point2)
+end
+
+function linkifyTable(points, loop)
+  if loop == nil then
+    loop = true
+  end
+  -- Returns first link.
+  local first = nil
+  local last = nil
+  local prev = nil
+  local current = nil
+  for i, v in pairs(points) do
+    current = lPoint(v)
+    current.id = i
+    if first == nil then
+      first = current
+    end
+    linkPoints(prev, current)
+    prev = current
+  end
+  last = current
+  if loop == true then
+    linkPoints(last, first)
+  end
+
+  -- Reverse link list
+  prev = first
+  current = first
+  for i = 1, #points, 1 do
+    current = current.links[1]
+    linkPoints(current, prev)
+    prev = current
+  end
+  linkPoints(first, last)
+  return first
+end
+
+function intersectLinks(link1, link2, isect)
+  debug("Intersect links", 2)
+  -- Takes two tables of two lPoints each and and intersection point.
+  if link1 == nil or link2 == nil then
+    return
+  end
+  if isect == nil then
+    -- Figure out the intersection point. Write later.
+    return
+  end
+  local isect = lPoint(Vector(isect))
+  isect.id = 0
+  injectLink(link1[1], link1[2], isect)
+  injectLink(link2[1], link2[2], isect)
+  return isect
+end
+
+function walkDirection(start, prev, current)
+  debug("Walking point " .. dumpLink(current), 2)
+  if current == start then
+    -- We completed the loop.
+    return current
+  elseif #current.links == 1 then
+    -- Dead end
+    return false
+  elseif #current.links == 2 then
+    -- Only one way to go.
+    local next = current.links[1]
+    if next == prev then
+      next = current.links[2]
+    end
+    return {current, walkDirection(start, current, next)}
+  end
+  -- We're at an intersection. Decide where to go.
+  local linkAngles = {}
+  for i,v in pairs(current.links) do
+    if v ~= prev then
+      table.insert(linkAngles, {
+        link = v,
+        angle = angleDiff(prev.point, current.point, v.point)
+      })
+    end
+  end
+
+  table.sort(linkAngles, function(a,b) return a.angle > b.angle end)
+
+  for i,v in pairs(linkAngles) do
+    local pathFound = walkDirection(start, current, v.link)
+    if pathFound ~= false then
+      return { current, pathFound }
+    end
+  end
+end
+
+function flattenTable(target)
+  local result = {}
+  while #target == 2 do
+    table.insert(result, target[1])
+    target = target[2]
+  end
+  table.insert(result, target[1])
+  return result
+end
