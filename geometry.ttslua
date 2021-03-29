@@ -316,3 +316,36 @@ function angleDiff(p1, p2, p3)
   end
   return diff
 end
+
+function convertToLineSegments(lineObjs)
+  local result = {}
+  for i,v in pairs(lineObjs) do
+    debug(#v.points)
+    if v.loop == false and #v.points > 2 then
+      v.points = cleanLineObj(v.points)
+    end
+    for pi = 1, #v.points - 1, 1 do
+      table.insert(result, {
+        loop = false,
+        thickness = v.thickness,
+        color = v.color,
+        points = {
+          Vector(v.points[pi]),
+          Vector(v.points[pi + 1])
+        }
+      })
+    end
+    if v.loop == true then
+      table.insert(result, {
+        loop = false,
+        thickness = v.thicksness,
+        color = v.color,
+        points = {
+          Vector(v.points[#v.points]),
+          Vector(v.points[1])
+        }
+      })
+    end
+  end
+  return result
+end
