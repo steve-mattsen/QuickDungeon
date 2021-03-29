@@ -307,21 +307,6 @@ function setSuperLock(obj, state)
   end
 end
 
-function cleanLineObj(points)
-  local currentPoint = points[1]
-  local result = { currentPoint }
-  local minDistance = 0.33
-  for i, v in pairs(points) do
-    if currentPoint:distance(v) >= minDistance then
-      table.insert(result, v)
-      currentPoint = v
-    elseif i == #points then
-      -- Always insert the last point.
-      table.insert(result, v)
-    end
-  end
-  return result
-end
 
 function cleanEndPoints(points)
   local intersect = false
