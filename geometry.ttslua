@@ -320,8 +320,7 @@ end
 function convertToLineSegments(lineObjs)
   local result = {}
   for i,v in pairs(lineObjs) do
-    debug(#v.points)
-    if v.loop == false and #v.points > 2 then
+    if #v.points > 4 then
       v.points = cleanLineObj(v.points)
     end
     for pi = 1, #v.points - 1, 1 do
@@ -351,9 +350,19 @@ function convertToLineSegments(lineObjs)
 end
 
 function cleanLineObj(points)
+  debug(#points)
+  local result = {}
+  if #points == 36 then
+    for i,v in pairs(points) do
+      if i % 2 == 0 then
+        table.insert(result, v)
+      end
+    end
+    return result
+  end
   local currentPoint = points[1]
-  local result = { currentPoint }
   local minDistance = 0.33
+  table.insert(result, currentPoint)
   for i, v in pairs(points) do
     if currentPoint:distance(v) >= minDistance then
       table.insert(result, v)
@@ -370,7 +379,7 @@ end
 function sanitizeLineObjs(lineObjs)
   debug("Sanitizing line objets", 1)
   for i,v in pairs(lineObjs) do
-    if #v.points > 2 and v.loop == false then
+    if #v.points > 4 then
      --It's a free-form line. Let's simplify and clean up the lines.
       v.points = cleanLineObj(v.points)
      --Now let's see if the end points (or close to them) intersect.
