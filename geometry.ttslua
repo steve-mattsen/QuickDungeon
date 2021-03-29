@@ -365,3 +365,16 @@ function cleanLineObj(points)
   end
   return result
 end
+
+
+function sanitizeLineObjs(lineObjs)
+  debug("Sanitizing line objets", 1)
+  for i,v in pairs(lineObjs) do
+    if #v.points > 2 and v.loop == false then
+     --It's a free-form line. Let's simplify and clean up the lines.
+      v.points = cleanLineObj(v.points)
+     --Now let's see if the end points (or close to them) intersect.
+      v.points = cleanEndPoints(v.points)
+    end
+  end
+end
