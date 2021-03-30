@@ -271,7 +271,7 @@ function callbackSinglePlane(box, p1, p2)
     return nil
   end
   setSuperLock(box, true)
-  box.setScale({0.1, 0.2, p1:distance(p2) * (1/14)}) -- 1 / 14, width of walls.
+  box.setScale({0.1, 0.2, p1:distance(p2) /14 }) -- 1 / 14, width of walls.
   p1.y = 0
   p2.y = 0
   local angle = p1:angle(p2)
