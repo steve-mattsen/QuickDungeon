@@ -207,9 +207,7 @@ function makeWalls(shapes)
   -- Make line groups based on bbox collision.
   for si, sv in pairs(shapes) do
     for i,v in pairs(sv) do
-      if i == 1 then
-        createWall(sv[#sv].point, v.point )
-      else
+      if i > 1 then
         createWall(sv[i-1].point, v.point)
       end
     end
