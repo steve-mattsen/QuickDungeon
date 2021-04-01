@@ -153,37 +153,37 @@ function joinGroups(groups)
   for gi,gv in pairs(groups) do
     local groupIsects = {}
     for li, lv in pairs(gv) do
-      if allMaps[gi] == nil then
-        allMaps[gi] = lv.linkFirst
-      elseif lv.linkFirst.point.x < allMaps[gi].point.x then
-        -- Make sure we always start at the left-most point.
-        allMaps[gi] = lv.linkFirst
-      end
       -- Go through lineObjects in a group and join their linked point maps by intersections.
+
+      if allMaps[gi] == nil then
+        allMaps[gi] = lv.leftMostLink
+      elseif lv.leftMostLink.point.x < allMaps[gi].point.x then
+        allMaps[gi] = lv.leftMostLink
+      end
       for lli = li + 1, #gv, 1 do
         local llv = gv[lli]
-
+        if llv.leftMostLink.point.x < allMaps[gi].point.x then
+          allMaps[gi] = llv.leftMostLink
+        end
         -- Go through each combination of lineObjects that hasn't been checked yet
-        local olap = boundsOverlap(lv.bbox, llv.bbox, true)
+        local olap = boundsOverlap(lv.bbox, llv.bbox, true, 2)
 
         if olap.area > -1 then
           -- Link the objects
-          local links1 = selectLinksInBbox(lv.linkFirst, olap.bbox)
-          local links2 = selectLinksInBbox(llv.linkFirst, olap.bbox)
+          -- local links1 = selectLinksInBbox(lv.linkFirst, lv.bbox)
+          -- local links2 = selectLinksInBbox(llv.linkFirst, llv.bbox)
+
+          local links1 = lv.links
+          local links2 = llv.links
+
           -- Find
+          debug("Number of links in each obj: " .. #links1 .. " and " .. #links2, 2)
           local isects = findLinksIntersections(links1, links2)
           debug("Found " .. #isects .. " intersections between lineObj " .. li .. " and " .. lli, 2)
-          for i,v in pairs(isects) do
-            table.insert(groupIsects, v)
-          end
         end
       end
     end
-    debug("Found " .. #groupIsects .. " intersections in group " .. gi)
     -- Now we got all the intersections in the group. Let's join them.
-    for i,v in pairs(groupIsects) do
-      intersectLinks(v.line1, v.line2, v.isect)
-    end
   end
   return allMaps
 end
