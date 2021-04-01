@@ -52,7 +52,8 @@ function linkifyTable(points, loop)
   if loop == nil then
     loop = true
   end
-  -- Returns left-most link.
+  -- Returns a table of all links created.
+  local result = {}
 
   local leftMost = nil
   local first = nil
@@ -65,11 +66,7 @@ function linkifyTable(points, loop)
     if first == nil then
       first = current
     end
-    if leftMost == nil then
-      leftMost = current
-    elseif current.point.x < leftMost.point.x then
-      leftMost = current
-    end
+    table.insert(result, current)
     linkPoints(prev, current)
     prev = current
   end
@@ -87,8 +84,7 @@ function linkifyTable(points, loop)
     prev = current
   end
   -- linkPoints(first, last)
-  return leftMost
-end
+  return result
 end
 
 function intersectLinks(link1, link2, isect)

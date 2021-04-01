@@ -102,7 +102,13 @@ end
 function linkifyLineObjs(lineObjs)
   debug("Linkifying Line Objects",1)
   for i,v in pairs(lineObjs) do
-    v.linkFirst = linkifyTable(v.points, v.loop)
+    v.links = linkifyTable(v.points, v.loop)
+    v.leftMostLink = v.links[1]
+    for ii, vv in pairs(v.links) do
+      if vv.point.x < v.leftMostLink.point.x then
+        v.leftMostLink = vv
+      end
+    end
   end
 end
 
