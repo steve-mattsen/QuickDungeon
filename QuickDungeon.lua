@@ -223,7 +223,7 @@ function createWall(p1, p2, color)
   if color == nil then
     color = Color.fromString("White")
   end
-  debug('Creating wall from ' .. dump(p1) .. ' to ' .. dump(p2), 2)
+  debug('Creating wall ' .. dumpPoint(p1) .. ' -> ' .. dumpPoint(p2), 2)
   local pos = p1:lerp(p2, 0.5);
   local box = spawnObject({
     type = "Custom_Model",
