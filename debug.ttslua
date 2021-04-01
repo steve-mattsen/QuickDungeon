@@ -80,6 +80,17 @@ function dumpLink(lpoint)
   return result
 end
 
+function dumpLinks(start, indexPerLink)
+  local current = start
+  local result = ""
+  for i = 0, 1024, 1 do -- To prevent infinite loops.
+    result = result .. "\
+    " .. dumpLink(current)
+    current = current.links[indexPerLink]
+    if current == start then return result end
+  end
+  return result
+end
 
 function pingMap(start)
   local visited = {}
