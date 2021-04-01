@@ -52,8 +52,9 @@ function pingLine(line)
   end
 end
 
-function pingPoint(point)
+function pingPoint(point, delay)
   point = Vector(point)
+  point.y = 0
   Player.getPlayers()[1].pingTable(point)
 end
 
