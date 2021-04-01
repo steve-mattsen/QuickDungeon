@@ -81,6 +81,26 @@ function dumpLink(lpoint)
 end
 
 
+function pingMap(start)
+  local visited = {}
+  walkAndPing(start, visited)
+end
+
+function walkAndPing(lpoint, visited)
+  if visited == nil then
+    visited = {}
+  end
+  if visited[lpoint] == true then
+    return
+  end
+  debug(dumpLink(lpoint), 2)
+  pingPoint(lpoint.point)
+  visited[lpoint] = true
+  for i,v in pairs(lpoint.links) do
+    walkAndPing(v, visited)
+  end
+end
+
 function dumpPoint(point)
   local result = "("
   result = result .. round(point.x, 2) .. ', '
