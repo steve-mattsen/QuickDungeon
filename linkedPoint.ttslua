@@ -41,27 +41,11 @@ function unlink(point1, point2)
 end
 
 function injectLink(point1, point2, inject)
-  local p1Iter = 0
-  local p2Iter = 0
-  for i,v in pairs(point1.links) do
-    if (v == point2) then
-      p1Iter = i
-      break
-    end
-  end
-  for i,v in pairs(point2.links) do
-    if (v == point1) then
-      p2Iter = i
-      break
-    end
-  end
-
-  table.remove(point1.links, p1Iter)
-  table.remove(point2.links, p2Iter)
-  table.insert(point1.links, p1Iter, inject)
-  table.insert(point2.links, p2Iter, inject)
-  table.insert(inject.links, point1)
-  table.insert(inject.links, point2)
+  unlink(point1, point2)
+  linkPoints(point1, inject)
+  linkPoints(point2, inject)
+  linkPoints(inject, point1)
+  linkPoints(inject, point2)
 end
 
 function linkifyTable(points, loop)
