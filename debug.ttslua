@@ -80,6 +80,13 @@ function dumpLink(lpoint)
   return result
 end
 
+
+function dumpPoint(point)
+  local result = "("
+  result = result .. round(point.x, 2) .. ', '
+  result = result .. round(point.z, 2) .. ')'
+  return result
+end
 -- level 0: no debug
 -- Level 1: function calls
 -- level 2: Loops and major events
