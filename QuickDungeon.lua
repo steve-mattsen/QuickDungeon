@@ -50,9 +50,10 @@ function prepareLineObjs(lineObjs)
     return nil
   end
   for i, v in pairs(lineObjs) do
-    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 2)
+    debug('Finding bounds for line object ' .. i)
     v.id = i
     v.bbox = bboxLineObj(v)
+    debug('Bounding box ' .. dumpPoint(v.bbox[1]) .. ' -> ' .. dumpPoint(v.bbox[2]), 2)
   end
 end
 
