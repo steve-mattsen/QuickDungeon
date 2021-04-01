@@ -123,10 +123,15 @@ end
   return o
 end
 
-function linesIntersect(line1, line2)
+function linesIntersect(line1, line2, includeOverlap)
+  -- Takes two tables of two Vectors each and an optional bool.
+  -- If includeOverlap is false, it will return false if the intersection lies on one of the endpoints.
   -- Equations taken from https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line_segment
   -- t = (x1-x3)(y3-y4) - (y1-y3)(x3-x4) / (x1-x2)(y3-y4) - (y1-y2)(x3-x4)
   -- u = (x2-x1)(y1-y3) - (y2-y1)(x1-x3) / (x1-x2)(y3-y4) - (y1-y2)(x3-x4)
+  if includeOverlap == nil then
+    includeOverlap = true
+  end
   local g1 = (line1[1].x - line2[1].x) * (line2[1].z - line2[2].z)
   g1 = g1 - ((line1[1].z - line2[1].z) * (line2[1].x - line2[2].x))
   local g2 = (line1[1].x - line1[2].x) * (line2[1].z - line2[2].z)
@@ -137,6 +142,11 @@ function linesIntersect(line1, line2)
   local u = g3 / g2
   if t < 0 or t > 1 or u < 0 or u > 1 then
     return false
+  end
+  if includeOverlap == false then
+    if t == 1 or t == 0 or u == 1 or u == 0 then
+      return false
+    end
   end
   return Vector(
     line1[1].x + (t * (line1[2].x - line1[1].x)),
