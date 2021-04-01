@@ -71,6 +71,15 @@ function pingBox(bbox)
   pingPoint(Vector(bbox[2].x, 0, bbox[1].z))
 end
 setDebug(0)
+
+function dumpLink(lpoint)
+  local result = lpoint.id .. ": "
+  for i, v in pairs(lpoint.links) do
+    result = result .. " -> " .. v.id
+  end
+  return result
+end
+
 -- level 0: no debug
 -- Level 1: function calls
 -- level 2: Loops and major events
