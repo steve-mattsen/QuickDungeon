@@ -190,7 +190,6 @@ function makeShapes(maps)
     local fakeStart = Vector(mv.point)
     fakeStart.x = fakeStart.x - 1
     fakeStart = lPoint(fakeStart)
-    pingPoint(fakeStart.point)
     local leftPath = walkDirection(mv, fakeStart)
     -- local rightPath = walkDirection(mv.links[1], true, mv, mv.links[2])
     local flat = flattenTable(leftPath)
