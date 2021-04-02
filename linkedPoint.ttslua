@@ -104,7 +104,10 @@ function intersectLinks(link1, link2, isect)
   return isect
 end
 
-function walkDirection(start, prev, current)
+function walkDirection(start, prev, goRight, current)
+  if goRight == nil then
+    goRight = false
+  end
   if current == nil then
     current = start
   end
@@ -114,17 +117,17 @@ function walkDirection(start, prev, current)
   else
     if current == start then
       -- We completed the loop.
-      return current
+      return {current}
     elseif #current.links == 1 then
       -- Dead end
-      return false
+      return {current}
     elseif #current.links == 2 then
       -- Only one way to go.
       local next = current.links[1]
       if next == prev then
         next = current.links[2]
       end
-      return {current, walkDirection(start, current, next)}
+      return {current, walkDirection(start, current, goRight, next)}
     end
   end
 
@@ -139,10 +142,15 @@ function walkDirection(start, prev, current)
     end
   end
 
-  table.sort(linkAngles, function(a,b) return a.angle > b.angle end)
+  if goRight then
+    table.sort(linkAngles, function(a,b) return a.angle < b.angle end)
+  else
+    table.sort(linkAngles, function(a,b) return a.angle > b.angle end)
+  end
+
 
   for i,v in pairs(linkAngles) do
-    local pathFound = walkDirection(start, current, v.link)
+    local pathFound = walkDirection(start, current, goRight, v.link)
     if pathFound ~= false then
       return { current, pathFound }
     end
