@@ -27,11 +27,11 @@ function dump(o)
   if type(o) == 'table' then
     local result = ""
     for i, v in pairs(o) do
-      result = result .. i .. ": \t" .. JSON.encode(v) .. ", \r\n"
+      result = result .. i .. ": \t" .. JSON.encode_pretty(v) .. ", \r\n"
     end
     return result
   elseif type(o) != 'string' then
-    o = JSON.encode(o)
+    o = JSON.encode_pretty(o)
   end
   return o
 end
@@ -52,8 +52,9 @@ function pingLine(line)
   end
 end
 
-function pingPoint(point)
+function pingPoint(point, delay)
   point = Vector(point)
+  point.y = 0
   Player.getPlayers()[1].pingTable(point)
 end
 
@@ -70,6 +71,53 @@ function pingBox(bbox)
   pingPoint(Vector(bbox[2].x, 0, bbox[1].z))
 end
 setDebug(0)
+
+function dumpLink(lpoint)
+  local result = lpoint.id .. ": "
+  for i, v in pairs(lpoint.links) do
+    result = result .. " -> " .. v.id
+  end
+  return result
+end
+
+function dumpLinks(start, indexPerLink)
+  local current = start
+  local result = ""
+  for i = 0, 1024, 1 do -- To prevent infinite loops.
+    result = result .. "\
+    " .. dumpLink(current)
+    current = current.links[indexPerLink]
+    if current == start then return result end
+  end
+  return result
+end
+
+function pingMap(start)
+  local visited = {}
+  walkAndPing(start, visited)
+end
+
+function walkAndPing(lpoint, visited)
+  if visited == nil then
+    visited = {}
+  end
+  if visited[lpoint] == true then
+    return
+  end
+  debug(dumpLink(lpoint), 2)
+  pingPoint(lpoint.point)
+  visited[lpoint] = true
+  for i,v in pairs(lpoint.links) do
+    walkAndPing(v, visited)
+  end
+end
+
+function dumpPoint(point)
+  local result = "("
+  result = result .. round(point.x, 2) .. ', '
+  result = result .. round(point.z, 2) .. ')'
+  return result
+end
 -- level 0: no debug
 -- Level 1: function calls
 -- level 2: Loops and major events

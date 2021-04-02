@@ -50,9 +50,10 @@ function prepareLineObjs(lineObjs)
     return nil
   end
   for i, v in pairs(lineObjs) do
-    debug('Finding bounds for line object ' .. i .. ": " .. dump(v), 2)
+    debug('Finding bounds for line object ' .. i)
     v.id = i
     v.bbox = bboxLineObj(v)
+    debug('Bounding box ' .. dumpPoint(v.bbox[1]) .. ' -> ' .. dumpPoint(v.bbox[2]), 2)
   end
 end
 
@@ -97,22 +98,17 @@ function collectWalls()
   return result
 end
 
-function sanitizeLineObjs(lineObjs)
-  debug("Sanitizing line objets", 1)
-  for i,v in pairs(lineObjs) do
-    if #v.points > 2 and v.loop == false then
-     --It's a free-form line. Let's simplify and clean up the lines.
-      v.points = cleanLineObj(v.points)
-     --Now let's see if the end points (or close to them) intersect.
-      v.points = cleanEndPoints(v.points)
-    end
-  end
-end
 
 function linkifyLineObjs(lineObjs)
   debug("Linkifying Line Objects",1)
   for i,v in pairs(lineObjs) do
-    v.linkFirst = linkifyTable(v.points, v.loop)
+    v.links = linkifyTable(v.points, v.loop)
+    v.leftMostLink = v.links[1]
+    for ii, vv in pairs(v.links) do
+      if vv.point.x < v.leftMostLink.point.x then
+        v.leftMostLink = vv
+      end
+    end
   end
 end
 
@@ -157,37 +153,34 @@ function joinGroups(groups)
   for gi,gv in pairs(groups) do
     local groupIsects = {}
     for li, lv in pairs(gv) do
-      if allMaps[gi] == nil then
-        allMaps[gi] = lv.linkFirst
-      elseif lv.linkFirst.point.x < allMaps[gi].point.x then
-        -- Make sure we always start at the left-most point.
-        allMaps[gi] = lv.linkFirst
-      end
       -- Go through lineObjects in a group and join their linked point maps by intersections.
+
+      if allMaps[gi] == nil then
+        allMaps[gi] = lv.leftMostLink
+      elseif lv.leftMostLink.point.x < allMaps[gi].point.x then
+        allMaps[gi] = lv.leftMostLink
+      end
       for lli = li + 1, #gv, 1 do
         local llv = gv[lli]
-
+        if llv.leftMostLink.point.x < allMaps[gi].point.x then
+          allMaps[gi] = llv.leftMostLink
+        end
         -- Go through each combination of lineObjects that hasn't been checked yet
         local olap = boundsOverlap(lv.bbox, llv.bbox, true)
 
         if olap.area > -1 then
           -- Link the objects
-          local links1 = selectLinksInBbox(lv.linkFirst, olap.bbox)
-          local links2 = selectLinksInBbox(llv.linkFirst, olap.bbox)
+          local links1 = lv.links
+          local links2 = llv.links
+
           -- Find
+          debug("Number of links in each obj: " .. #links1 .. " and " .. #links2, 2)
           local isects = findLinksIntersections(links1, links2)
           debug("Found " .. #isects .. " intersections between lineObj " .. li .. " and " .. lli, 2)
-          for i,v in pairs(isects) do
-            table.insert(groupIsects, v)
-          end
         end
       end
     end
-    debug("Found " .. #groupIsects .. " intersections in group " .. gi)
     -- Now we got all the intersections in the group. Let's join them.
-    for i,v in pairs(groupIsects) do
-      intersectLinks(v.line1, v.line2, v.isect)
-    end
   end
   return allMaps
 end
@@ -200,7 +193,6 @@ function makeShapes(maps)
     local fakeStart = Vector(mv.point)
     fakeStart.x = fakeStart.x - 1
     fakeStart = lPoint(fakeStart)
-    pingPoint(fakeStart.point)
     local leftPath = walkDirection(mv, fakeStart)
     -- local rightPath = walkDirection(mv.links[1], true, mv, mv.links[2])
     local flat = flattenTable(leftPath)
@@ -218,9 +210,7 @@ function makeWalls(shapes)
   -- Make line groups based on bbox collision.
   for si, sv in pairs(shapes) do
     for i,v in pairs(sv) do
-      if i == 1 then
-        createWall(sv[#sv].point, v.point )
-      else
+      if i > 1 then
         createWall(sv[i-1].point, v.point)
       end
     end
@@ -233,7 +223,7 @@ function createWall(p1, p2, color)
   if color == nil then
     color = Color.fromString("White")
   end
-  debug('Creating wall from ' .. dump(p1) .. ' to ' .. dump(p2), 2)
+  debug('Creating wall ' .. dumpPoint(p1) .. ' -> ' .. dumpPoint(p2), 2)
   local pos = p1:lerp(p2, 0.5);
   local box = spawnObject({
     type = "Custom_Model",
@@ -282,7 +272,7 @@ function callbackSinglePlane(box, p1, p2)
     return nil
   end
   setSuperLock(box, true)
-  box.setScale({0.1, 0.2, p1:distance(p2) * (1/14)}) -- 1 / 14, width of walls.
+  box.setScale({0.1, 0.2, p1:distance(p2) /14 }) -- 1 / 14, width of walls.
   p1.y = 0
   p2.y = 0
   local angle = p1:angle(p2)
@@ -307,21 +297,6 @@ function setSuperLock(obj, state)
   end
 end
 
-function cleanLineObj(points)
-  local currentPoint = points[1]
-  local result = { currentPoint }
-  local minDistance = 0.33
-  for i, v in pairs(points) do
-    if currentPoint:distance(v) >= minDistance then
-      table.insert(result, v)
-      currentPoint = v
-    elseif i == #points then
-      -- Always insert the last point.
-      table.insert(result, v)
-    end
-  end
-  return result
-end
 
 function cleanEndPoints(points)
   local intersect = false

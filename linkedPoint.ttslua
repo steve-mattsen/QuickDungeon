@@ -41,34 +41,19 @@ function unlink(point1, point2)
 end
 
 function injectLink(point1, point2, inject)
-  local p1Iter = 0
-  local p2Iter = 0
-  for i,v in pairs(point1.links) do
-    if (v == point2) then
-      p1Iter = i
-      break
-    end
-  end
-  for i,v in pairs(point2.links) do
-    if (v == point1) then
-      p2Iter = i
-      break
-    end
-  end
-
-  table.remove(point1.links, p1Iter)
-  table.remove(point2.links, p2Iter)
-  table.insert(point1.links, p1Iter, inject)
-  table.insert(point2.links, p2Iter, inject)
-  table.insert(inject.links, point1)
-  table.insert(inject.links, point2)
+  unlink(point1, point2)
+  linkPoints(point1, inject)
+  linkPoints(point2, inject)
+  linkPoints(inject, point1)
+  linkPoints(inject, point2)
 end
 
 function linkifyTable(points, loop)
   if loop == nil then
     loop = true
   end
-  -- Returns left-most link.
+  -- Returns a table of all links created.
+  local result = {}
 
   local leftMost = nil
   local first = nil
@@ -81,11 +66,7 @@ function linkifyTable(points, loop)
     if first == nil then
       first = current
     end
-    if leftMost == nil then
-      leftMost = current
-    elseif current.point.x < leftMost.point.x then
-      leftMost = current
-    end
+    table.insert(result, current)
     linkPoints(prev, current)
     prev = current
   end
@@ -103,12 +84,11 @@ function linkifyTable(points, loop)
     prev = current
   end
   -- linkPoints(first, last)
-  return leftMost
-end
+  return result
 end
 
 function intersectLinks(link1, link2, isect)
-  debug("Intersect links", 2)
+  debug("Intersect links", 3)
   -- Takes two tables of two lPoints each and and intersection point.
   if link1 == nil or link2 == nil then
     return

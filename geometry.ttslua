@@ -64,7 +64,7 @@ function isInBounds(point, bounds, boundsOffset)
   return true
 end
 
-function boundsOverlap(bbox1, bbox2, fullCalc)
+function boundsOverlap(bbox1, bbox2, fullCalc, offset)
   -- Checks whether the bounding boxes overlap.
   -- If they do, returns a bounding box describing their overlap area.
   -- Assumes bbox1 and 2 are two points in {lowerLeft, upperRight} format.
@@ -75,11 +75,16 @@ function boundsOverlap(bbox1, bbox2, fullCalc)
   if fullCalc == nil then
     fullCalc = false
   end
+  if offset == nil then
+    offset = 0
+  end
   if fullCalc == false then
-  if bbox1[1].z > bbox2[2].z then
+  bbox1 = deepcopy(bbox1)
+  bbox2 = deepcopy(bbox2)
+  if bbox1[1].z - offset > bbox2[2].z + offset then
     -- bbox1 is above bbox2
     return false
-  elseif bbox1[2].z < bbox2[1].z then
+  elseif bbox1[2].z + offset < bbox2[1].z - offset then
     -- bbox1 is below bbox2
     return false
   elseif bbox1[1].x > bbox2[2].x then
@@ -123,10 +128,15 @@ end
   return o
 end
 
-function linesIntersect(line1, line2)
+function linesIntersect(line1, line2, includeOverlap)
+  -- Takes two tables of two Vectors each and an optional bool.
+  -- If includeOverlap is false, it will return false if the intersection lies on one of the endpoints.
   -- Equations taken from https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line_segment
   -- t = (x1-x3)(y3-y4) - (y1-y3)(x3-x4) / (x1-x2)(y3-y4) - (y1-y2)(x3-x4)
   -- u = (x2-x1)(y1-y3) - (y2-y1)(x1-x3) / (x1-x2)(y3-y4) - (y1-y2)(x3-x4)
+  if includeOverlap == nil then
+    includeOverlap = true
+  end
   local g1 = (line1[1].x - line2[1].x) * (line2[1].z - line2[2].z)
   g1 = g1 - ((line1[1].z - line2[1].z) * (line2[1].x - line2[2].x))
   local g2 = (line1[1].x - line1[2].x) * (line2[1].z - line2[2].z)
@@ -137,6 +147,11 @@ function linesIntersect(line1, line2)
   local u = g3 / g2
   if t < 0 or t > 1 or u < 0 or u > 1 then
     return false
+  end
+  if includeOverlap == false then
+    if t == 1 or t == 0 or u == 1 or u == 0 then
+      return false
+    end
   end
   return Vector(
     line1[1].x + (t * (line1[2].x - line1[1].x)),
@@ -184,7 +199,6 @@ function lineObjIntersectionsInBbox(lineObj1, lineObj2, bbox)
         isect.line1 = { prevPoint1, pv1 }
         isect.line2 = { prevPoint2, pv2 }
         table.insert(intersections, isect)
-        pingPoint(isect)
       end
 
       ::continue2::
@@ -248,55 +262,58 @@ function findLinksIntersections(links1, links2)
   -- Takes two arrays of link points
   -- Returns an array of intersections and their related points.
   local result = {}
-  local links1First = true
-  for i,v in pairs(links1) do
-    local links2First = true
-    for ii,vv in pairs(links2) do
-      if links1First == true or links2First == true then
-        -- Check the first link of links1 and/or links2 backwards.
-        local lines = {}
-        if links1First == true then
-          table.insert(lines, { v, v.links[1] })
-        else
-          table.insert(lines, { v, v.links[2] })
-        end
-        if links2First == true then
-          table.insert(lines, { vv, vv.links[1] })
-        else
-          table.insert(lines, { vv, vv.links[2] })
-        end
-        local isect = linesIntersect(
-          {lines[1][1].point, lines[1][2].point},
-          {lines[2][1].point, lines[2][2].point}
-        )
-        if isect ~= false then
-          table.insert(result, {
-            line1 = lines[1],
-            line2 = lines[2],
-            isect = isect
-          })
-        else
-        end
+  local i = 1
+  while (i <= #links1) do
+    if i > 512 then break end -- Let's limit this just in case.
+    local v = links1[i]
+    local line1 = {v}
+    if i == #links1 then
+      table.insert(line1, links1[1])
+    else
+      table.insert(line1, links1[i+1])
+    end
+
+    local ii = 1
+    while (ii <= #links2) do
+      if ii > 512 then break end -- Let's limit this just in case.
+      local vv = links2[ii]
+      local line2 = {vv}
+      if ii == #links2 then
+        table.insert(line2, links2[1])
+      else
+        table.insert(line2, links2[ii+1])
       end
-      -- Make a line segment out of each point's forward link.
-      local lines = {
-        {v, v.links[2]},
-        {vv, vv.links[2]}
-      }
-      local isect = linesIntersect(
-        {lines[1][1].point, lines[1][2].point},
-        {lines[2][1].point, lines[2][2].point}
+
+      local isect = nil
+      local newPoint = true
+      if vv == v then
+        -- Both points are the same intersection. Skip over vv.
+        goto isectcontinue2
+      end
+
+      isect = linesIntersect(
+        {line1[1].point, line1[2].point},
+        {line2[1].point, line2[2].point},
+        false
       )
       if isect ~= false then
+        -- It's a new intersection. Let's make one.
+        newPoint = intersectLinks(line1, line2, isect)
+        table.insert(links1, i+1, newPoint)
+        table.insert(links2, ii+1, newPoint)
         table.insert(result, {
-          line1 = lines[1],
-          line2 = lines[2],
-          isect = isect
+          line1 = line1,
+          line2 = line2,
+          isect =  newPoint
         })
+        i = i - 1
+        goto isectcontinue1
       end
-      links2First = false
+      ::isectcontinue2::
+      ii = ii + 1
     end
-    links1First = false
+    ::isectcontinue1::
+    i = i + 1
   end
   return result
 end
@@ -315,4 +332,85 @@ function angleDiff(p1, p2, p3)
     return diff - 360
   end
   return diff
+end
+
+function convertToLineSegments(lineObjs)
+  local result = {}
+  for i,v in pairs(lineObjs) do
+    if #v.points > 4 then
+      v.points = cleanLineObj(v.points)
+    end
+    for pi = 1, #v.points - 1, 1 do
+      table.insert(result, {
+        loop = false,
+        thickness = v.thickness,
+        color = v.color,
+        points = {
+          Vector(v.points[pi]),
+          Vector(v.points[pi + 1])
+        }
+      })
+    end
+    if v.loop == true then
+      table.insert(result, {
+        loop = false,
+        thickness = v.thicksness,
+        color = v.color,
+        points = {
+          Vector(v.points[#v.points]),
+          Vector(v.points[1])
+        }
+      })
+    end
+  end
+  return result
+end
+
+function cleanLineObj(points)
+  debug(#points)
+  local result = {}
+  if #points == 36 then
+    for i,v in pairs(points) do
+      if i % 2 == 0 then
+        table.insert(result, v)
+      end
+    end
+    return result
+  end
+  local currentPoint = points[1]
+  table.insert(result, currentPoint)
+  local minDistance = 1
+  for i, v in pairs(points) do
+    if currentPoint:distance(v) >= minDistance then
+      table.insert(result, v)
+      currentPoint = v
+    elseif i == #points then
+      -- Always insert the last point.
+      table.insert(result, v)
+    end
+  end
+  return result
+end
+
+
+function sanitizeLineObjs(lineObjs)
+  debug("Sanitizing line objets", 1)
+  for i,v in pairs(lineObjs) do
+    if (#v.points > 2 and v.loop == false) or #v.points > 4 then
+     --It's a free-form line. Let's simplify and clean up the lines.
+      v.points = cleanLineObj(v.points)
+    end
+  end
+end
+
+function round(num, numDecimalPlaces)
+  local mult = 10^(numDecimalPlaces or 0)
+  return math.floor(num * mult + 0.5) / mult
+end
+
+function offsetBbox(bbox, offset)
+  return {
+      Vector(bbox[1].x - offset, 0, bbox[1].z - offset),
+      Vector(bbox[2].x + offset, 0, bbox[2].z + offset),
+  }
 end
