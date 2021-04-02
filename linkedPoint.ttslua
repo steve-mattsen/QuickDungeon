@@ -158,3 +158,15 @@ function flattenTable(target)
   table.insert(result, target[1])
   return result
 end
+
+function table.reverse ( tab )
+  -- Taken from https://pastebin.com/MMqKBEhi
+  local size = #tab
+  local newTable = {}
+
+  for i,v in ipairs ( tab ) do
+    newTable[size-i] = v
+  end
+  
+  return newTable
+end
