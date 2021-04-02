@@ -170,9 +170,6 @@ function joinGroups(groups)
 
         if olap.area > -1 then
           -- Link the objects
-          -- local links1 = selectLinksInBbox(lv.linkFirst, lv.bbox)
-          -- local links2 = selectLinksInBbox(llv.linkFirst, llv.bbox)
-
           local links1 = lv.links
           local links2 = llv.links
 
