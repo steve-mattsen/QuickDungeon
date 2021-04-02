@@ -166,7 +166,7 @@ function joinGroups(groups)
           allMaps[gi] = llv.leftMostLink
         end
         -- Go through each combination of lineObjects that hasn't been checked yet
-        local olap = boundsOverlap(lv.bbox, llv.bbox, true, 2)
+        local olap = boundsOverlap(lv.bbox, llv.bbox, true)
 
         if olap.area > -1 then
           -- Link the objects

@@ -64,7 +64,7 @@ function isInBounds(point, bounds, boundsOffset)
   return true
 end
 
-function boundsOverlap(bbox1, bbox2, fullCalc)
+function boundsOverlap(bbox1, bbox2, fullCalc, offset)
   -- Checks whether the bounding boxes overlap.
   -- If they do, returns a bounding box describing their overlap area.
   -- Assumes bbox1 and 2 are two points in {lowerLeft, upperRight} format.
@@ -75,11 +75,16 @@ function boundsOverlap(bbox1, bbox2, fullCalc)
   if fullCalc == nil then
     fullCalc = false
   end
+  if offset == nil then
+    offset = 0
+  end
   if fullCalc == false then
-  if bbox1[1].z > bbox2[2].z then
+  bbox1 = deepcopy(bbox1)
+  bbox2 = deepcopy(bbox2)
+  if bbox1[1].z - offset > bbox2[2].z + offset then
     -- bbox1 is above bbox2
     return false
-  elseif bbox1[2].z < bbox2[1].z then
+  elseif bbox1[2].z + offset < bbox2[1].z - offset then
     -- bbox1 is below bbox2
     return false
   elseif bbox1[1].x > bbox2[2].x then
@@ -403,3 +408,9 @@ function round(num, numDecimalPlaces)
   return math.floor(num * mult + 0.5) / mult
 end
 
+function offsetBbox(bbox, offset)
+  return {
+      Vector(bbox[1].x - offset, 0, bbox[1].z - offset),
+      Vector(bbox[2].x + offset, 0, bbox[2].z + offset),
+  }
+end
