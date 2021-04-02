@@ -65,9 +65,10 @@ function linkifyTable(points, loop)
     current.id = i
     if first == nil then
       first = current
+    else
+      linkPoints(prev, current)
     end
     table.insert(result, current)
-    linkPoints(prev, current)
     prev = current
   end
   last = current
@@ -83,7 +84,6 @@ function linkifyTable(points, loop)
     linkPoints(current, prev)
     prev = current
   end
-  -- linkPoints(first, last)
   return result
 end
 
