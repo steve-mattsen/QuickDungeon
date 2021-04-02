@@ -302,7 +302,6 @@ function findLinksIntersections(links1, links2)
           isect =  newPoint
         })
         i = i - 1
-        pingPoint(isect)
         goto isectcontinue1
       end
       ::isectcontinue2::
