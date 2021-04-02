@@ -194,10 +194,13 @@ function makeShapes(maps)
     fakeStart.x = fakeStart.x - 1
     fakeStart = lPoint(fakeStart)
     local leftPath = walkDirection(mv, fakeStart)
-    -- local rightPath = walkDirection(mv.links[1], true, mv, mv.links[2])
     local flat = flattenTable(leftPath)
-    table.insert(flat, mv)
     table.insert(shapes, flat)
+    if flat[#flat] ~= mv then
+      local rightPath = walkDirection(mv, fakeStart, true)
+      local rightFlat = flattenTable(rightPath)
+      table.insert(shapes, table.reverse(rightFlat))
+    end
   end
   return shapes
 end
