@@ -194,7 +194,6 @@ function lineObjIntersectionsInBbox(lineObj1, lineObj2, bbox)
         isect.line1 = { prevPoint1, pv1 }
         isect.line2 = { prevPoint2, pv2 }
         table.insert(intersections, isect)
-        pingPoint(isect)
       end
 
       ::continue2::

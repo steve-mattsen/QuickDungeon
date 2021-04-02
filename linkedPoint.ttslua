@@ -88,7 +88,7 @@ function linkifyTable(points, loop)
 end
 
 function intersectLinks(link1, link2, isect)
-  debug("Intersect links", 2)
+  debug("Intersect links", 3)
   -- Takes two tables of two lPoints each and and intersection point.
   if link1 == nil or link2 == nil then
     return
