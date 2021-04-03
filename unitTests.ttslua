@@ -1,0 +1,49 @@
+function onLoad()
+  testLinesIntersect()
+end
+
+logStyle("normal", {0,0,0})
+logStyle("error", {1,0,0})
+logStyle("success", {0,1,0})
+
+function test(result, expected)
+  local tag = "error"
+  if result == expected then
+    tag = "success"
+  end
+  log("Expected: " .. dump(expected), nil, tag)
+  log("Result: " .. dump(result), nil, tag)
+end
+
+function testLinesIntersect()
+  log("Testing linesIntersect.")
+
+  log("Crossed line segments returns intersection?")
+  local l1 = {
+    Vector(2, 0, 4),
+    Vector(2, 0, 2)
+  }
+  local l2 = {
+    Vector(3, 0, 3),
+    Vector(1, 0, 3)
+  }
+
+  drawLine(l2)
+  local isect = linesIntersect(l1,l2)
+  test(isect, Vector(2,0,3))
+
+  log("Barely intersecting line segments return intersection?")
+  l1[2].z = 3
+  isect = linesIntersect(l1,l2)
+  test(isect, Vector(2,0,3))
+
+  log("Line segments sharing end point returns false?")
+  l1[2].x = 1
+  drawLine(l1)
+  isect = linesIntersect(l1,l2, false)
+  test(isect, false)
+
+  log("Line segments sharing end point returns vector?")
+  isect = linesIntersect(l1,l2)
+  test(isect, Vector(1,0, 3))
+end
